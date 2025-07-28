@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>컴공 입학</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: url('college_gate.jpg') no-repeat center center / cover;
+      height: 100vh;
+      font-family: 'Noto Sans KR', sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: white;
+      text-align: center;
+      overflow: hidden;
+    }
+
+    .overlay {
+      background-color: rgba(0, 0, 0, 0.6);
+      padding: 50px;
+      border-radius: 15px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.5);
+    }
+
+    #typewriter {
+      font-size: 1.8rem;
+      line-height: 1.6;
+    }
+
+    .enter {
+      margin-top: 30px;
+      font-size: 1rem;
+      opacity: 0;
+      animation: blink 1s infinite;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 0; }
+      50% { opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+  <div class="overlay">
+    <div id="typewriter"></div>
+    <div class="enter" id="enterMsg">[ENTER] 계속하려면</div>
+  </div>
+
+  <script>
+    const lines = [
+      "축하합니다!",
+      "당신은 컴퓨터공학과에 입학하게 되었습니다.",
+      "이제 새로운 여정이 시작됩니다..."
+    ];
+    let i = 0, j = 0;
+    const speed = 50;
+    const target = document.getElementById("typewriter");
+
+    function typeLine() {
+      if (i < lines.length) {
+        if (j < lines[i].length) {
+          target.innerHTML += lines[i].charAt(j);
+          j++;
+          setTimeout(typeLine, speed);
+        } else {
+          target.innerHTML += "<br>";
+          i++;
+          j = 0;
+          setTimeout(typeLine, 600);
+        }
+      } else {
+        document.getElementById("enterMsg").style.opacity = 1;
+      }
+    }
+
+    typeLine();
+
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Enter") {
+        window.location.href = "2step.html";  // 다음 화면으로 연결
+      }
+    });
+  </script>
+</body>
+</html>

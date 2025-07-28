@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>컴퓨터실</title>
+  <style>
+    body {
+      margin: 0;
+      background-image: url('computer_room.jpg'); /* 고화질 컴퓨터실 배경 */
+      background-repeat: no-repeat;
+      background-size: cover;
+      background-position: center;
+      height: 100vh;
+      font-family: 'Noto Sans KR', sans-serif;
+    }
+
+    .textbox {
+      position: absolute;
+      bottom: 5%;
+      left: 5%;
+      right: 5%;
+      background-color: rgba(0, 48, 70, 0.85);
+      border-radius: 10px;
+      padding: 20px 25px;
+      font-size: 20px;
+      line-height: 1.7;
+      color: white;
+      box-shadow: 0 0 15px rgba(0,0,0,0.6);
+    }
+
+    .speaker {
+      background-color: #003850;
+      display: inline-block;
+      padding: 6px 18px;
+      border-top-left-radius: 5px;
+      border-top-right-radius: 5px;
+      font-weight: bold;
+      margin-bottom: 12px;
+    }
+
+    .next-btn {
+      margin-top: 20px;
+      float: right;
+      background-color: #008CBA;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      font-size: 1rem;
+      cursor: pointer;
+      display: none;
+    }
+
+    .next-btn:hover {
+      background-color: #0070a0;
+    }
+  </style>
+</head>
+<body>
+  <div class="textbox">
+    <div class="speaker">나</div>
+    <div id="dialogue"></div>
+    <button id="nextBtn" class="next-btn" onclick="goToNext()">다음</button>
+  </div>
+
+  <script>
+    const text = `이제 어느덧 대학교 컴퓨터공학과에 진학했네 ...?\n\n동아리에서 실습을 진행 중인데 갑자기 내 컴퓨터만 에러가 뜬다 ...`;
+    const speed = 60;
+    let i = 0;
+
+    function typeWriter() {
+      if (i < text.length) {
+        const char = text.charAt(i) === '\n' ? "<br>" : text.charAt(i);
+        document.getElementById("dialogue").innerHTML += char;
+        i++;
+        setTimeout(typeWriter, speed);
+      } else {
+        document.getElementById("nextBtn").style.display = "inline-block";
+      }
+    }
+
+    function goToNext() {
+      window.location.href = "3step.html";  // 다음 단계 페이지로 이동
+    }
+
+    window.onload = () => {
+      typeWriter();
+    };
+
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Enter" && document.getElementById("nextBtn").style.display === "inline-block") {
+        goToNext();
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>AI 시뮬레이션 시작</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: url("computer_room.jpg") no-repeat center center / cover;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: 'Noto Sans KR', sans-serif;
+      outline: none; /* 포커스 테두리 제거 */
+    }
+
+    .card {
+      background-color: rgba(10, 60, 85, 0.9);
+      color: white;
+      padding: 40px;
+      border-radius: 12px;
+      box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.4);
+      max-width: 700px;
+      text-align: center;
+      font-size: 1.2rem;
+      line-height: 1.8;
+    }
+
+    .blinking {
+      animation: blink 1s step-start infinite;
+    }
+
+    @keyframes blink {
+      50% { opacity: 0; }
+    }
+  </style>
+</head>
+<body tabindex="-1">
+
+  <div class="card">
+    [ AI 시뮬레이션 모드 진입 중... ]<br /><br />
+    너는 컴퓨터공학과 2학년, 동아리방에서 실습 중이었다.<br />
+    그런데 갑자기 시스템이 멈추고, 이상한 메시지가 화면에 떴다.<br /><br />
+    “기억을 되찾아야 한다. 단, AI는 모든 걸 말하지 않는다.”<br /><br />
+    누군가 실습 컴퓨터에 이상한 걸 깔아뒀네…?<br /><br />
+    <span class="blinking">[ENTER] 키를 눌러 시뮬레이션을 시작하세요.</span>
+  </div>
+
+  <script>
+    window.onload = () => {
+      document.body.focus();  // body에 포커스 강제 부여
+    };
+
+    document.addEventListener("keydown", function(event) {
+      if (event.key === "Enter") {
+        window.location.href = "5step.html";
+      }
+    });
+  </script>
+
+</body>
+</html>

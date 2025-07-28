@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>시스템 오류</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      background-color: black;
+      color: #00FF00;
+      font-family: 'Courier New', monospace;
+      font-size: 20px;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .border {
+      border-top: 5px solid red;
+      border-bottom: 5px solid red;
+      padding: 60px;
+      box-sizing: border-box;
+      height: 100%;
+    }
+
+    .red-text {
+      color: red;
+    }
+
+    .center {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+    }
+
+    .content {
+      white-space: pre-wrap;
+      max-width: 80%;
+    }
+
+    .blinking {
+      animation: blink 1s step-start infinite;
+    }
+
+    @keyframes blink {
+      50% { opacity: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="border">
+    <div class="center">
+      <div class="content">
+        시스템 오류 발생...  
+        <span class="red-text">[Error Code: 0xA17C]</span>
+        
+        Unknown Runtime Exception  
+        FLAG 프로세스 손상 감지됨  
+        복구를 위해 관리자 권한이 필요합니다...
+
+        <br><br>
+        <span class="blinking">[ENTER] 키를 누르고 에러를 해결하고 FLAG값을 찾으시오.</span>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
