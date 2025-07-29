@@ -13,7 +13,7 @@
       justify-content: center;
       align-items: center;
       font-family: 'Noto Sans KR', sans-serif;
-      outline: none; /* 포커스 테두리 제거 */
+      outline: none;
     }
 
     .card {
@@ -35,6 +35,22 @@
     @keyframes blink {
       50% { opacity: 0; }
     }
+
+    .enter-btn {
+      margin-top: 30px;
+      padding: 12px 24px;
+      font-size: 1.1rem;
+      border: none;
+      border-radius: 8px;
+      background-color: #007acc;
+      color: white;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .enter-btn:hover {
+      background-color: #005f99;
+    }
   </style>
 </head>
 <body tabindex="-1">
@@ -43,22 +59,31 @@
     [ AI 시뮬레이션 모드 진입 중... ]<br /><br />
     너는 컴퓨터공학과 2학년, 동아리방에서 실습 중이었다.<br />
     그런데 갑자기 시스템이 멈추고, 이상한 메시지가 화면에 떴다.<br /><br />
-    “기억을 되찾아야 한다. 단, AI는 모든 걸 말하지 않는다.”<br /><br />
+    “기억을 되찾아야 한다. 단, AI는 한번으로 말해주지 않는다.”<br /><br />
     누군가 실습 컴퓨터에 이상한 걸 깔아뒀네…?<br /><br />
-    <span class="blinking">[ENTER] 키를 눌러 시뮬레이션을 시작하세요.</span>
+    <span class="blinking">[ENTER] 키를 누르거나 아래 버튼을 클릭하세요.</span><br /><br />
+
+    <button class="enter-btn" onclick="goToNext()">ENTER</button>
   </div>
 
   <script>
-    window.onload = () => {
-      document.body.focus();  // body에 포커스 강제 부여
-    };
+    function goToNext() {
+      window.location.href = "5step.html";
+    }
 
     document.addEventListener("keydown", function(event) {
       if (event.key === "Enter") {
-        window.location.href = "5step.html";
+        goToNext();
       }
     });
   </script>
+
+<div style="position: fixed; bottom: 20px; left: 20px;">
+  <button onclick="window.location.href='computer_room.html'"
+          style="padding: 10px 18px; background-color: #003950; color: white; border: none; border-radius: 6px; font-size: 1rem; cursor: pointer;">
+    🖥 컴퓨터실로 돌아가기
+  </button>
+</div>
 
 </body>
 </html>
