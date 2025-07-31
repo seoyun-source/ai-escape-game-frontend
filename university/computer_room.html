@@ -12,30 +12,24 @@
       overflow: hidden;
     }
 
-    /* 블루스크린 GIF 위치 */
-    .error-gif {
+    /* 반짝이는 클릭 가능 영역 */
+    .click-area {
       position: absolute;
-      top: 68%;
-      left: 39%;
-      transform: translate(-50%, -50%);
-      width: 180px;
+      top: 68%;  /* 컴퓨터 화면 위치에 맞게 조절 */
+      left: 38.5%; /* 컴퓨터 화면 위치에 맞게 조절 */
+      width: 180px;  /* 원하는 크기로 조절 */
       height: 90px;
-      border-radius: 0px;
-      box-shadow: 0 0 25px rgba(0, 0, 255, 0.8);
-      animation: glitch 1.5s infinite;
+      transform: translate(-50%, -50%);
+      border-radius: 10px;
       cursor: pointer;
-      object-fit: cover;
+      transition: box-shadow 0.3s ease, transform 0.3s ease;
     }
 
-    @keyframes glitch {
-      0%, 100% { transform: translate(-50%, -50%) scale(1); }
-      20% { transform: translate(-51%, -49%) scale(1.01); }
-      40% { transform: translate(-50.5%, -50.5%) scale(0.99); }
-      60% { transform: translate(-49.5%, -50.5%) scale(1.02); }
-      80% { transform: translate(-50%, -51%) scale(0.98); }
+    .click-area:hover {
+      box-shadow: 0 0 30px 10px rgba(233, 8, 8, 0.8);
+      transform: translate(-50%, -50%) scale(1.05);
     }
 
-    /* 돌아가기 버튼 */
     .return-btn {
       position: fixed;
       bottom: 10px;
@@ -57,8 +51,11 @@
 </head>
 <body>
 
-  <!-- 블루스크린 GIF가 보이는 컴퓨터 화면 -->
-  <img src="bluescreen.gif" class="error-gif" alt="에러 발생 중인 컴퓨터" onclick="location.href='4step.html'">
+  <!-- 클릭 가능한 반짝이는 컴퓨터 화면 부분 -->
+  <div class="click-area" onclick="location.href='4step.html'" title="클릭해서 이동"></div>
+
+  <!-- 돌아가기 버튼 -->
+  <button class="return-btn" onclick="history.back()">돌아가기</button>
 
 </body>
 </html>

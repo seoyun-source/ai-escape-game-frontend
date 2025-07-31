@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>Base64 디코더</title>
+  <style>
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      background-color: #f7f7f7;
+      padding: 40px;
+      text-align: center;
+    }
+
+    textarea {
+      width: 80%;
+      height: 150px;
+      margin-bottom: 20px;
+      font-size: 1rem;
+      padding: 10px;
+    }
+
+    button {
+      padding: 10px 20px;
+      font-size: 1rem;
+      background-color: #0078D4;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #005a9e;
+    }
+
+    .output {
+      margin-top: 30px;
+      padding: 20px;
+      width: 80%;
+      background-color: white;
+      border: 1px solid #ccc;
+      min-height: 100px;
+      word-break: break-all;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🧬 Base64 디코더</h1>
+  <p>Base64로 인코딩된 문자열을 입력하세요:</p>
+
+  <textarea id="base64Input" placeholder="여기에 Base64 문자열을 입력하세요..."></textarea><br>
+  <button onclick="decodeBase64()">디코딩</button>
+
+  <div class="output" id="decodedOutput">디코딩된 결과가 여기에 표시됩니다.</div>
+
+  <script>
+    function decodeBase64() {
+      const input = document.getElementById("base64Input").value.trim();
+      try {
+        const decoded = atob(input);
+        document.getElementById("decodedOutput").textContent = decoded;
+      } catch (e) {
+        document.getElementById("decodedOutput").textContent = "❌ 유효하지 않은 Base64 문자열입니다.";
+      }
+    }
+  </script>
+
+</body>
+</html>
