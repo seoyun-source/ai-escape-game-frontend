@@ -4,56 +4,50 @@
   <meta charset="UTF-8">
   <title>컴퓨터실</title>
   <style>
-    body {
+    html, body {
       margin: 0;
-      background: url("computer_room.jpg") no-repeat center center / cover;
-      height: 100vh;
-      font-family: 'Noto Sans KR', sans-serif;
+      padding: 0;
+      height: 100%;
+      background: black; /* 검은 배경으로 여백 방지 */
+    }
+
+    .container {
+      position: relative;
+      width: 100%;
+      height: 100%;
       overflow: hidden;
     }
 
-    /* 반짝이는 클릭 가능 영역 */
-    .click-area {
-      position: absolute;
-      top: 68%;  /* 컴퓨터 화면 위치에 맞게 조절 */
-      left: 38.5%; /* 컴퓨터 화면 위치에 맞게 조절 */
-      width: 180px;  /* 원하는 크기로 조절 */
-      height: 90px;
-      transform: translate(-50%, -50%);
-      border-radius: 10px;
-      cursor: pointer;
-      transition: box-shadow 0.3s ease, transform 0.3s ease;
+    .background-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover; /* 창 비율에 맞추되 이미지 왜곡없이 채우기 */
     }
+.click-area {
+  position: absolute;
+  top: 60%;
+  left: 29%;
+  width: 19%;
+  aspect-ratio: 2/1;
+  border-radius: 10px;
+  cursor: pointer;
+  background-color: rgba(255, 0, 0, 0.3); /* 위치 테스트용 임시 배경 */
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
+}
+
 
     .click-area:hover {
       box-shadow: 0 0 30px 10px rgba(233, 8, 8, 0.8);
-      transform: translate(-50%, -50%) scale(1.05);
-    }
-
-    .return-btn {
-      position: fixed;
-      bottom: 10px;
-      left: 10px;
-      padding: 10px 20px;
-      background-color: #003950;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      font-size: 1rem;
-      cursor: pointer;
-      z-index: 10;
-    }
-
-    .return-btn:hover {
-      background-color: #005a80;
+      transform: scale(1.05);
     }
   </style>
 </head>
 <body>
 
-  <!-- 클릭 가능한 반짝이는 컴퓨터 화면 부분 -->
-  <div class="click-area" onclick="location.href='4step.html'" title="클릭해서 이동"></div>
-
+  <div class="container">
+    <img class="background-img" src="computer_room.jpg" alt="컴퓨터실">
+    <div class="click-area" onclick="location.href='4step.html'" title="클릭해서 이동"></div>
+  </div>
 
 </body>
 </html>

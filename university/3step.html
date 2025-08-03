@@ -46,6 +46,11 @@
     @keyframes blink {
       50% { opacity: 0; }
     }
+
+    input, button {
+      font-size: 16px;
+      margin-top: 12px;
+    }
   </style>
 </head>
 <body>
@@ -61,20 +66,48 @@
 
         <br><br>
         <span class="blinking">컴퓨터실로 돌아가 FLAG값을 찾고 컴퓨터를 복구하시오.</span>
+
+        <br><br>
+        <input type="text" id="flagInput" placeholder="FLAG를 입력하세요" style="padding:5px;">
+        <button onclick="submitFlag()" style="padding:5px;">제출</button>
+        <div id="response" style="margin-top:10px;"></div>
       </div>
     </div>
   </div>
 
   <div style="position: fixed; bottom: 1cap; right: 10px;">
-<button onclick="window.location.href='computer_room.html'"
-        style="position: fixed; top: 10px; right: 10px;
-               padding: 6px 8px; background-color: #003950;
-               color: white; border: none; border-radius: 6px;
-               font-size: 0.85rem; cursor: pointer; z-index: 999;">
-  🖥 컴퓨터실로 돌아가기
-</button>
+    <button onclick="window.location.href='computer_room.html'"
+            style="position: fixed; top: 10px; right: 10px;
+                   padding: 6px 8px; background-color: #003950;
+                   color: white; border: none; border-radius: 6px;
+                   font-size: 0.85rem; cursor: pointer; z-index: 999;">
+      🖥 컴퓨터실로 돌아가기
+    </button>
+  </div>
 
-</div>
+  <script>
+    async function submitFlag() {
+      const flag = document.getElementById("flagInput").value;
+      const res = await fetch('/check_flag', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ flag: flag })
+      });
 
+      const result = await res.json();
+      const output = document.getElementById("response");
+
+      if (result.result && result.result.includes("정답")) {
+        output.innerText = result.result;
+        setTimeout(() => {
+          window.location.href = "connect_door.html";
+        }, 1500); // 1.5초 후 이동
+      } else {
+        output.innerText = result.result || "오류가 발생했습니다.";
+      }
+    }
+  </script>
 </body>
 </html>
