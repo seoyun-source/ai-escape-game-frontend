@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>문 앞</title>
+    <style>
+        body {
+            margin: 0;
+            background-image: url('door.png'); /* 이미지 파일명 맞게 조정 */
+            background-repeat: no-repeat;
+            background-position: center; /* 가운데 정렬 */
+            background-size: contain; /* 이미지 크기를 가로 기준에 맞춤 */
+            background-color: #000; /* 배경 여백 채우기용 */
+            height: 100vh;
+            font-family: 'Noto Sans KR', sans-serif;
+        }
+
+
+    .textbox {
+    position: absolute;
+    bottom: 5%;
+    left: 5%;
+    right: 5%;
+    background-color: white;
+    border-radius: 5px;
+    padding: 20px;
+    font-size: 20px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    }
+
+    .speaker {
+    background-color: #ccc;
+    display: inline-block;
+    padding: 5px 15px;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+    font-weight: bold;
+    margin-bottom: 10px;
+    }
+
+    .next-btn {
+    margin-top: 15px;
+    float: right;
+    background-color: #008CBA;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    display: none; /* 처음엔 숨김 */
+    }
+
+    .next-btn:hover {
+    background-color: #0070a0;
+    }
+    </style>
+</head>
+<body>
+    <div class="textbox">
+        <div class="speaker">나</div>
+        <div id="dialogue"></div>
+      
+    </div>
+
+    <script>
+        const text = "휴.. 드디어 에러를 해결하고 동아리도 끝났네" ;  // 원하는 대사 넣기
+        const speed = 130; // 글자당 딜레이(ms)
+        let i = 0;
+
+        function typeWriter() {
+            if (i < text.length) {
+                document.getElementById("dialogue").innerHTML += text.charAt(i);
+                i++;
+                setTimeout(typeWriter, speed);
+            } else {
+                document.getElementById("nextBtn").style.display = "inline-block";
+            }
+        }
+
+        window.onload = () => {
+            typeWriter();
+        };
+
+        function goToCreak() {
+            window.location.href = "transition.html";
+        }
+      
+    </script>
+    <!-- 문 클릭 영역 -->
+    <div id="doorHotspot" onclick="goToCreak()"
+         style="position: absolute; left: 53%; top: 56%; width: 4%; height: 4%; cursor: pointer;"></div>
+
+</body>
+</html>
