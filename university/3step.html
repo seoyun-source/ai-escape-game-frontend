@@ -88,9 +88,7 @@
   <script>
     async function submitFlag() {
       const flag = document.getElementById("flagInput").value;
-      // 수정된 코드 (백엔드 주소 명시)
       const res = await fetch('http://127.0.0.1:8000/check_flag/', {
-
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -105,11 +103,16 @@
         output.innerText = result.result;
         setTimeout(() => {
           window.location.href = "connect_door.html";
-        }, 1500); // 1.5초 후 이동
+        }, 1500);
       } else {
         output.innerText = result.result || "오류가 발생했습니다.";
       }
     }
+
+    // ✅ 20초 후 자동 이동
+    setTimeout(() => {
+      window.location.href = "4step.html";
+    }, 20000);
   </script>
 </body>
 </html>
