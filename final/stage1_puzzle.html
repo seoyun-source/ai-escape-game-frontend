@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>1단계: AI 검증 퍼즐</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-image: url('beach.png');
+            background-size: cover;
+            background-position: center;
+            height: 100vh;
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .puzzle-container {
+            background: rgba(0, 0, 0, 0.9);
+            padding: 40px;
+            border-radius: 20px;
+            color: white;
+            text-align: center;
+            max-width: 500px;
+            animation: slideIn 1s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(50px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1 {
+            margin-bottom: 30px;
+            font-size: 28px;
+            color: #fff;
+        }
+
+        .answer-row {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin: 30px 0;
+        }
+
+        .answer-slot {
+            width: 80px;
+            height: 50px;
+            border: 2px solid #4a90a4; /* 차분한 청록색 */
+            border-radius: 8px;
+            background: rgba(74, 144, 164, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .answer-slot:hover {
+            background: rgba(74, 144, 164, 0.25);
+            transform: scale(1.05);
+        }
+
+        .answer-slot.filled {
+            background: rgba(106, 168, 79, 0.25); /* 차분한 초록색 */
+            border-color: #6aa84f;
+        }
+
+        .word-row {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+
+        .word-button {
+            background: linear-gradient(145deg, #f5f5f5, #e8e8e8); /* 차분한 회백색 */
+            color: #333;
+            padding: 15px 25px;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .word-button:hover {
+            background: linear-gradient(145deg, #e8e8e8, #d5d5d5);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+        }
+
+        .word-button.selected {
+            background: linear-gradient(145deg, #9fc5e8, #6fa8dc); /* 차분한 파란색 */
+            color: white;
+            transform: translateY(-2px) scale(1.05);
+        }
+
+        .word-button.disabled {
+            background: linear-gradient(145deg, #d0d0d0, #bbb);
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .action-buttons {
+            margin: 30px 0;
+        }
+
+        .check-btn {
+            background: linear-gradient(145deg, #cc4125, #a53f24); /* 차분한 적갈색 */
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 25px;
+            font-size: 18px;
+            cursor: pointer;
+            margin: 10px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 12px rgba(204, 65, 37, 0.3);
+        }
+
+        .check-btn:hover {
+            background: linear-gradient(145deg, #a53f24, #8b351f);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(204, 65, 37, 0.4);
+        }
+
+        .reset-btn {
+            background: linear-gradient(145deg, #666, #555);
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            margin: 10px;
+            transition: all 0.3s;
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .reset-btn:hover {
+            background: linear-gradient(145deg, #555, #444);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .result {
+            margin-top: 20px;
+            font-size: 20px;
+            font-weight: bold;
+            min-height: 30px;
+        }
+
+        .success {
+            color: #6aa84f; /* 차분한 초록색 */
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        .error {
+            color: #cc4125; /* 차분한 빨간색 */
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 20px rgba(106, 168, 79, 0.5); }
+            to { text-shadow: 0 0 30px rgba(106, 168, 79, 0.8); }
+        }
+
+        .hint {
+            margin-top: 15px;
+            color: #ccc;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="puzzle-container">
+        <h1>AI 검증 시스템</h1>
+        <p>지금까지의 단서를 연결하여 진실을 밝혀내세요</p>
+        
+        <div class="answer-row">
+            <div class="answer-slot" onclick="clickSlot(0)" id="slot0"></div>
+            <div class="answer-slot" onclick="clickSlot(1)" id="slot1"></div>
+            <div class="answer-slot" onclick="clickSlot(2)" id="slot2"></div>
+            <div class="answer-slot" onclick="clickSlot(3)" id="slot3"></div>
+        </div>
+
+        <div class="word-row">
+            <button class="word-button" onclick="clickWord('ke', this)">ke</button>
+            <button class="word-button" onclick="clickWord('you', this)">You</button>
+            <button class="word-button" onclick="clickWord('fa', this)">Fa</button>
+            <button class="word-button" onclick="clickWord('re', this)">'re</button>
+        </div>
+
+        <div class="action-buttons">
+            <button class="check-btn" onclick="checkAnswer()">진실 확인</button>
+            <button class="reset-btn" onclick="resetPuzzle()">다시 시작</button>
+        </div>
+        
+        <div class="result" id="result"></div>
+    </div>
+
+    <script>
+        let selectedWord = null;
+        let selectedButton = null;
+        let answers = ['', '', '', ''];
+
+        function clickWord(word, button) {
+            console.log('단어 클릭:', word);
+            
+            if (button.classList.contains('disabled')) {
+                console.log('비활성화된 버튼');
+                return;
+            }
+
+            // 모든 버튼 선택 해제
+            document.querySelectorAll('.word-button').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+
+            // 현재 버튼 선택
+            button.classList.add('selected');
+            selectedWord = word;
+            selectedButton = button;
+            
+            console.log('선택된 단어:', selectedWord);
+        }
+
+        function clickSlot(index) {
+            console.log('슬롯 클릭:', index);
+            
+            if (!selectedWord) {
+                alert('먼저 단어를 선택하세요!');
+                return;
+            }
+
+            // 기존 단어가 있으면 해당 버튼 다시 활성화
+            if (answers[index]) {
+                const oldWord = answers[index];
+                document.querySelectorAll('.word-button').forEach(btn => {
+                    if (btn.textContent === oldWord || btn.textContent === "'" + oldWord) {
+                        btn.classList.remove('disabled');
+                    }
+                });
+            }
+
+            // 새 단어 배치
+            answers[index] = selectedWord;
+            document.getElementById('slot' + index).textContent = selectedWord;
+            document.getElementById('slot' + index).classList.add('filled');
+
+            // 선택된 버튼 비활성화
+            selectedButton.classList.remove('selected');
+            selectedButton.classList.add('disabled');
+
+            selectedWord = null;
+            selectedButton = null;
+            
+            console.log('현재 답안:', answers);
+        }
+
+        function checkAnswer() {
+            console.log('답안 체크:', answers);
+            
+            const answer = answers.join(' ');
+            const resultDiv = document.getElementById('result');
+
+            if (answer === 'you re fa ke') {
+                resultDiv.textContent = '✨ 진실이 밝혀졌습니다! "You\'re Fake"';
+                resultDiv.className = 'result success';
+                
+                setTimeout(() => {
+                    // 다음 단계로 이동
+                    window.location.href = 'stage2_ending.html';
+                }, 3000);
+                
+            } else {
+                resultDiv.textContent = '❌ 다시 시도해보세요';
+                resultDiv.className = 'result error';
+            }
+        }
+
+        function resetPuzzle() {
+            console.log('퍼즐 리셋');
+            
+            answers = ['', '', '', ''];
+            selectedWord = null;
+            selectedButton = null;
+
+            // 모든 슬롯 비우기
+            for (let i = 0; i < 4; i++) {
+                document.getElementById('slot' + i).textContent = '';
+                document.getElementById('slot' + i).classList.remove('filled');
+            }
+
+            // 모든 버튼 초기화
+            document.querySelectorAll('.word-button').forEach(btn => {
+                btn.classList.remove('selected', 'disabled');
+            });
+
+            // 결과 지우기
+            document.getElementById('result').textContent = '';
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>0단계: 해변 도착</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            font-family: Arial, sans-serif;
+            position: relative;
+            overflow: hidden;
+            background-color: #000;
+        }
+
+        /* 검은 화면 페이드 */
+        .fade-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #000;
+            z-index: 1000;
+            opacity: 1;
+            transition: opacity 3s ease-in-out;
+        }
+
+        /* 해변 배경 */
+        .beach-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('beach.png');
+            background-size: cover;
+            background-position: center;
+            opacity: 0;
+            transition: opacity 2s ease-in-out;
+        }
+
+        /* 바다 위 문 */
+        .mysterious-door {
+            position: absolute;
+            right: 15%;
+            top: 45%;
+            width: 100px;
+            height: 150px;
+            background: linear-gradient(145deg, #8B4513, #654321);
+            border-radius: 12px;
+            border: 3px solid #4A4A4A;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.5);
+            display: none;
+            animation: doorFloat 3s ease-in-out infinite;
+            cursor: pointer;
+            z-index: 100;
+        }
+
+        .mysterious-door::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            right: 15px;
+            width: 6px;
+            height: 6px;
+            background: #FFD700;
+            border-radius: 50%;
+            transform: translateY(-50%);
+        }
+
+        @keyframes doorFloat {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-8px); }
+        }
+
+        .mysterious-door:hover {
+            box-shadow: 0 20px 50px rgba(255, 215, 0, 0.3);
+        }
+
+        /* 사고 말풍선 */
+        .thought-bubble {
+            position: absolute;
+            top: 15%;
+            left: 15%;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 20px 25px;
+            font-size: 18px;
+            color: #333;
+            max-width: 300px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            display: none;
+            animation: thoughtAppear 1s ease-out;
+        }
+
+        .thought-bubble::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 30px;
+            width: 0;
+            height: 0;
+            border-left: 12px solid transparent;
+            border-right: 12px solid transparent;
+            border-top: 12px solid rgba(255, 255, 255, 0.95);
+        }
+
+        @keyframes thoughtAppear {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .next-hint {
+            position: absolute;
+            bottom: 10%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+            padding: 15px 25px;
+            border-radius: 25px;
+            font-size: 16px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            display: none;
+            animation: blink 2s infinite;
+            cursor: pointer;
+            z-index: 200;
+        }
+
+        .next-hint:hover {
+            background: rgba(255, 255, 255, 1);
+            transform: translateX(-50%) scale(1.05);
+        }
+
+        @keyframes blink {
+            0%, 50% { opacity: 0.7; }
+            51%, 100% { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <!-- 검은 화면 페이드 -->
+    <div class="fade-screen" id="fadeScreen"></div>
+    
+    <!-- 해변 배경 -->
+    <div class="beach-background" id="beachBg"></div>
+    
+    <!-- 바다 위 문 -->
+    <div class="mysterious-door" id="mysteriousDoor">
+        <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; cursor: pointer; z-index: 1000;" onclick="goToPuzzle()"></div>
+    </div>
+    
+    <!-- 사고 말풍선 -->
+    <div class="thought-bubble" id="thoughtBubble">
+        여기는... 해변인가? 바다 쪽으로 걸어가보자...
+    </div>
+
+    <!-- 다음 단계 힌트 -->
+    <div class="next-hint" id="nextHint" onclick="goToPuzzle()">
+        문을 클릭하여 다음 단계로 이동하세요
+    </div>
+
+    <script>
+        function startSequence() {
+            // 1. 검은 화면 (2초)
+            setTimeout(() => {
+                document.getElementById('fadeScreen').style.opacity = '0';
+                
+                setTimeout(() => {
+                    // 2. 해변 등장
+                    document.getElementById('beachBg').style.opacity = '1';
+                    
+                    setTimeout(() => {
+                        // 3. 첫 번째 생각
+                        document.getElementById('thoughtBubble').style.display = 'block';
+                        
+                        setTimeout(() => {
+                            // 4. 두 번째 생각 + 문 등장
+                            document.getElementById('thoughtBubble').innerHTML = 
+                                '이상해... 바다에 끝이 있어? 저기 문이 떠있다...';
+                            document.getElementById('mysteriousDoor').style.display = 'block';
+                            
+                            setTimeout(() => {
+                                // 5. 힌트 표시 + 큰 버튼 추가
+                                document.getElementById('thoughtBubble').style.display = 'none';
+                                document.getElementById('nextHint').style.display = 'block';
+                                
+                                // 큰 클릭 버튼 추가
+                                const bigButton = document.createElement('button');
+                                bigButton.innerHTML = '🚪 다음 단계로 이동';
+                                bigButton.style.cssText = `
+                                    position: fixed;
+                                    top: 70%;
+                                    left: 50%;
+                                    transform: translateX(-50%);
+                                    background: #ff4444;
+                                    color: white;
+                                    padding: 20px 40px;
+                                    border: none;
+                                    border-radius: 25px;
+                                    font-size: 20px;
+                                    cursor: pointer;
+                                    z-index: 9999;
+                                    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+                                `;
+                                bigButton.onclick = function() {
+                                    alert('이동합니다!');
+                                    window.location.href = 'stage1_puzzle.html';
+                                };
+                                document.body.appendChild(bigButton);
+                            }, 3000);
+                        }, 2500);
+                    }, 1500);
+                }, 1000);
+            }, 2000);
+        }
+
+        function goToPuzzle() {
+            console.log('문 클릭됨!');
+            alert('퍼즐 단계로 이동합니다!');
+            // 퍼즐 단계로 이동
+            window.location.href = 'stage1_puzzle.html';
+        }
+
+        window.onload = function() {
+            startSequence();
+        };
+    </script>
+</body>
+</html>
