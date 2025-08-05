@@ -1,0 +1,82 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>가정통신문</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #a96e2c;
+            font-family: 'Noto Sans KR', sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .paper {
+            background-color: #f9f7f1;
+            width: 540px;
+            padding: 40px 35px;
+            border: 1px solid #ccc;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 28px;
+            margin-bottom: 25px;
+        }
+
+        hr {
+            margin: 10px 0 25px;
+        }
+
+        .content {
+            font-size: 17px;
+            line-height: 1.8;
+            white-space: pre-line;
+        }
+
+        .back-button {
+            margin-top: 30px;
+            padding: 10px 20px;
+            background-color: #4a90e2;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+            .back-button:hover {
+                background-color: #3a6db5;
+            }
+    </style>
+</head>
+<body>
+    <div class="paper">
+        <h1>&lt;가정통신문&gt;</h1>
+        <hr>
+        <div class="content">
+            최근 교내 네트워크의 시스템 점검 중, 정체를 알 수 없는 접근 로그와 암호화된 메시지가 다수 발견되었습니다.
+            이에 따라 본교는 학생 여러분을 대상으로 모의 디지털 보안 상황에 대응하는 훈련을 비공식적으로 실시하고 있습니다.
+
+            이번 퀴즈는 단순한 정보 탐색이 아닌, "암호 해독과 판단력"을 요구합니다.
+            누가 무엇을 숨기고 있는지는 중요하지 않습니다. 지금 필요한 것은 당신의 해석입니다.
+
+            보이는 정보만 믿지 마시길 바랍니다.
+            신뢰가 흔들리는 순간, 진실이 드러날 수 있습니다.
+
+            이달의 퀴즈 정답:
+            칠판, 마지막줄, 문자, URL, 확인
+        </div>
+    </div>
+
+    <!-- 교실로 돌아가는 버튼 -->
+    <button class="back-button" onclick="location.href='classroom_scene.html'">교실로</button>
+</body>
+</html>

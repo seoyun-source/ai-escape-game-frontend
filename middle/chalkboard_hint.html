@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>칠판 힌트</title>
+  <style>
+    body {
+      margin: 0;
+      background-color: #1b1b1b;
+      font-family: 'Courier New', Courier, monospace;
+      color: #c4f0c5;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .chalkboard {
+      background-color: #2c4b2c;
+      border: 10px solid #513e2e;
+      border-radius: 8px;
+      padding: 40px 60px;
+      box-shadow: 0 0 40px rgba(0, 0, 0, 0.6);
+      text-align: left;
+      line-height: 1.6;
+      font-size: 20px;
+      white-space: pre;
+    }
+
+    .home-button {
+      position: absolute;
+      bottom: 40px;
+      background-color: #008CBA;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    .home-button:hover {
+      background-color: #0070a0;
+    }
+  </style>
+</head>
+<body>
+  <div class="chalkboard">
+────────────────────────────
+|   Today's Algorithm       |
+|                           |
+|   BASE64(data)            |
+|   → ASCII                 |
+|                           |
+|   FLAG = decoded(data)    |
+────────────────────────────
+  </div>
+  <button class="home-button" onclick="location.href='classroom_scene.html'">교실로</button>
+</body>
+</html>

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>디코딩 앱</title>
+  <style>
+    body {
+      background-color: #1c1c1c;
+      color: #eee;
+      font-family: 'Noto Sans KR', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+    }
+
+    input[type="text"] {
+      padding: 10px;
+      font-size: 16px;
+      width: 300px;
+      margin-bottom: 10px;
+    }
+
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
+
+    .result {
+      margin-top: 20px;
+      font-size: 18px;
+      font-weight: bold;
+      color: #00ff88;
+    }
+
+    .home-button {
+      margin-top: 40px;
+      background-color: #008CBA;
+    }
+    .home-button:hover {
+      background-color: #0070a0;
+    }
+  </style>
+</head>
+<body>
+  <h1>📱 디코딩 앱</h1>
+  <input type="text" id="encoded" placeholder="인코딩된 문자열을 입력하세요">
+  <button onclick="decodeBase64()">디코딩</button>
+  <div id="output" class="result"></div>
+
+  <button class="home-button" onclick="location.href='home_screen.html'">홈으로</button>
+
+  <script>
+    function decodeBase64() {
+      const encoded = document.getElementById('encoded').value.trim();
+      const output = document.getElementById('output');
+
+      try {
+        const decoded = atob(encoded);
+        output.style.color = '#00ff88';
+        output.textContent = `결과: ${decoded}`;
+      } catch (e) {
+        output.style.color = 'red';
+        output.textContent = '⚠️ 유효하지 않은 base64 문자열입니다.';
+      }
+    }
+  </script>
+</body>
+</html>

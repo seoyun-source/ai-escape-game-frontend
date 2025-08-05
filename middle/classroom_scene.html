@@ -1,0 +1,153 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>교실 씬</title>
+    <style>
+        body {
+            margin: 0;
+            background-image: url('classroom.png');
+            background-size: cover;
+            background-position: center;
+            height: 100vh;
+            font-family: 'Noto Sans KR', sans-serif;
+            position: relative;
+        }
+
+        .hotspot {
+            position: absolute;
+            cursor: pointer;
+            border: 2px solid rgba(255, 255, 255, 0.0); /* 기본 투명 */
+            border-radius: 8px;
+            transition: 0.2s;
+        }
+
+            .hotspot:hover {
+                border-color: #00ffff;
+                box-shadow: 0 0 10px #00ffff88;
+            }
+
+        /* 칠판 클릭 영역 */
+        .chalkboard {
+            top: 12%;
+            left: 34.8%;
+            width: 39.8%;
+            height: 22.7%;
+
+        }
+
+        /* 태블릿 클릭 영역 */
+        .tablet {
+            top: 63%;
+            left: 58.5%;
+            width: 6.3%;
+            height: 6%;
+        }
+
+        .hint {
+            top: 17%;
+            left: 78%;
+            width: 6%;
+            height: 13%;
+        }
+
+        .dialogue-box {
+            position: absolute;
+            bottom: 5%;
+            left: 5%;
+            right: 5%;
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            font-size: 18px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            box-shadow: 0 0 10px rgba(0,0,0,0.2);
+        }
+
+        .character {
+            background-color: #ccc;
+            font-weight: bold;
+            padding: 8px 14px;
+            border-radius: 5px;
+            white-space: nowrap;
+        }
+
+        .text {
+            flex: 1;
+        }
+
+        .next-btn {
+            background-color: #4a90e2;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 8px 16px;
+            font-size: 15px;
+            cursor: pointer;
+            display: none;
+        }
+
+            .next-btn:hover {
+                background-color: #3a6db5;
+            }
+
+    </style>
+</head>
+<body>
+    <!-- 칠판 클릭 영역 -->
+    <div class="hotspot chalkboard" onclick="location.href='chalkboard_hint.html'"></div>
+
+
+    <!-- 태블릿 클릭 영역 -->
+    <div class="hotspot tablet" onclick="location.href='tablet_message.html'"></div>
+
+    <!-- 게시판 클릭 영역(힌트)-->
+    <div class="hotspot hint" onclick="location.href='hint.html'"></div>
+
+    <!-- 자막 박스 -->
+    <div class="dialogue-box" id="dialogueBox">
+        <div class="character">나</div>
+        <div class="text" id="dialogueText"></div>
+        <button class="next-btn" id="nextBtn" onclick="hideDialogue()">다음</button>
+    </div>
+
+    <script>
+        const text = "태블릿에 문자가 와있네..? 한 번 확인해볼까..";
+        const speed = 215;
+        let i = 0;
+
+        function typeDialogue() {
+            if (i < text.length) {
+                document.getElementById("dialogueText").innerHTML += text.charAt(i);
+                i++;
+                setTimeout(typeDialogue, speed);
+            } else {
+                document.getElementById("nextBtn").style.display = "inline-block";
+            }
+        }
+
+        function hideDialogue() {
+            document.getElementById("dialogueBox").style.display = "none";
+            sessionStorage.setItem("tabletDialogueShown", "true");
+        }
+
+        window.onload = () => {
+            const alreadyShown = sessionStorage.getItem("tabletDialogueShown");
+
+            if (!alreadyShown) {
+                typeDialogue();
+            } else {
+                // 자막 숨김
+                document.getElementById("dialogueBox").style.display = "none";
+            }
+        };
+    </script>
+
+
+
+</body>
+
+
+</html>
