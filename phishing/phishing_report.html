@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>간단 보고서</title>
+  <meta name="viewport" content="width=360, initial-scale=1.0, user-scalable=no" />
+  <style>
+    body{margin:0;background:#000;font-family:'Apple SD Gothic Neo',system-ui,sans-serif}
+    .phone-frame{width:360px;height:640px;margin:120px auto;background:#fff;border-radius:20px;position:relative;box-shadow:0 0 20px rgba(0,0,0,.5);overflow:hidden}
+    .status-bar{height:30px;background:#000;color:#fff;display:flex;justify-content:space-between;align-items:center;padding:0 15px;font-size:13px;border-bottom:1px solid #000}
+    .app-title{padding:10px 12px;font-size:20px;font-weight:700;border-bottom:1px solid #eee;color:#2c3e50}
+    .scroll{position:absolute;top:72px;bottom:72px;left:0;right:0;overflow-y:auto;padding:14px}
+    .card{border:1px solid #eee;border-radius:12px;padding:12px;margin-top:12px;background:#fafafa}
+    .chips{display:flex;gap:6px;flex-wrap:wrap}
+    .chip{font-size:12px;border:1px solid #ddd;border-radius:999px;padding:4px 8px;background:#fff}
+    .good{color:#2e7d32}
+    .bad{color:#d32f2f}
+    .footer{position:absolute;left:50%;transform:translateX(-50%);bottom:18px;display:flex;gap:10px}
+    .btn{background:#1976d2;color:#fff;border:none;border-radius:10px;padding:10px 14px;font-weight:700;cursor:pointer;min-width:140px}
+    .btn.secondary{background:#6c757d}
+  </style>
+</head>
+<body>
+  <div class="phone-frame">
+    <div class="status-bar"><span>🔋 82%</span><span>LTE 📶</span></div>
+    <div class="app-title">📝 간단 보고서</div>
+
+    <div class="scroll" id="content"></div>
+
+    <div class="footer">
+      <button class="btn secondary" onclick="location.href='sms_app.html'">← 다시 보기</button>
+      <button class="btn" onclick="gotoNext()">다음 단계</button>
+    </div>
+  </div>
+
+  <script>
+    const STORE_KEY='phishingGame';
+    const CLUE_TEXT={
+      domain:'이상한 주소',
+      intl:'해외 번호',
+      urgency:'시간 압박 문구',
+      short:'짧은 링크(bit.ly)'
+    };
+
+    function getStore(){
+      const d=JSON.parse(localStorage.getItem(STORE_KEY)||'{}');
+      if(!d.clues)d.clues=[];
+      if(typeof d.urlDecoded!=='boolean') d.urlDecoded=false;
+      if(!d.password)d.password='YOU';
+      return d;
+    }
+
+    function render(){
+      const root=document.getElementById('content');
+      const d=getStore();
+
+      // 조건: 첫 화면에서 단서 2개 이상 + 여기서 미리보기 완료
+      if(!(d.clues.length>=2 && d.urlDecoded)){
+        root.innerHTML=`
+          <div class="card bad"><b>아직 준비가 안 됐어</b><br>
+          단서 2개 이상 모으고, ‘링크 미리보기’를 해봐.</div>
+        `;
+        return;
+      }
+
+      const chips = d.clues.map(k=>`<span class="chip">${CLUE_TEXT[k]||k}</span>`).join('');
+      root.innerHTML = `
+        <div class="card">
+          <b>오늘의 판정</b><br>
+          이 메시지는 <span class="bad"><b>피싱일 가능성 높음</b></span>
+        </div>
+
+        <div class="card">
+          <b>왜 그렇게 봤을까?</b>
+          <div class="chips" style="margin-top:6px">${chips}</div>
+        </div>
+
+        <div class="card">
+          <b>다음부터 이렇게 해봐 (3가지)</b><br>
+          1) <b>링크를 바로 누르지 말고</b> 미리보기로 실제 주소 보기<br>
+          2) <b>주소 철자</b>를 천천히 확인하기(숫자 0 vs 영문 O)<br>
+          3) 돈/상품 준다는 문자는 <b>앱이나 공식 사이트에서 직접 확인</b>
+        </div>
+
+        <div class="card">
+          <b>이걸 기억해...</b><br>
+          <code style="font-weight:700">${d.password}</code>
+        </div>
+      `;
+    }
+
+    function gotoNext(){
+      // 프로젝트에 맞게 수정
+      location.href='next_stage.html';
+    }
+    render();
+  </script>
+</body>
+</html>
