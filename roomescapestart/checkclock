@@ -1,0 +1,33 @@
+<button onclick="completeStage(1)">1단계 완료</button>
+
+<script>
+  function completeStage(stage) {
+    const start = parseInt(localStorage.getItem("start_time"));
+    const now = Date.now();
+    const elapsed = (now - start) / 1000;
+
+    const nickname = localStorage.getItem("nickname");
+
+    fetch("/submit_stage/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRFToken": "{{ csrf_token }}",
+      },
+      body: JSON.stringify({
+        nickname: nickname,
+        stage: stage,
+        elapsed: elapsed
+      }),
+    }).then(() => {
+      localStorage.setItem("start_time", Date.now()); // 다음 스테이지 시간 초기화
+      if (stage === 1) {
+        window.location.href = "/stage2/";
+      } else if (stage === 2) {
+        window.location.href = "/stage3/";
+      } else if (stage === 3) {
+        window.location.href = "/leaderboard/";
+      }
+    });
+  }
+</script>
