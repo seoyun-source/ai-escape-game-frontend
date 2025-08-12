@@ -65,55 +65,50 @@
       font-weight: bold;
       font-size: 16px;
     }
-     .button-row {
-         display: flex;
-         justify-content: space-between; /* 양쪽 정렬 */
-         gap: 10px;
-         margin-top: 30px;
-      }
-
-      .home-button,
-      .classroom-button {
-          padding: 10px 20px;
-          font-size: 16px;
-          background-color: #008CBA;
-          color: white;
-          border: none;
-          border-radius: 5px;
-          cursor: pointer;
-          min-width: 100px;
-          flex: 1; /* 버튼을 같은 너비로 맞춤 */
-          text-align: center;
-      }
-
-       .home-button:hover,
-       .classroom-button:hover {
-          background-color: #0070a0;
-          }
-
+    .button-row {
+      display: flex;
+      justify-content: space-between; /* 양쪽 정렬 */
+      gap: 10px;
+      margin-top: 30px;
+    }
+    .home-button,
+    .classroom-button {
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #008CBA;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      min-width: 100px;
+      flex: 1; /* 버튼을 같은 너비로 맞춤 */
+      text-align: center;
+    }
+    .home-button:hover,
+    .classroom-button:hover {
+      background-color: #0070a0;
     }
   </style>
 </head>
 <body>
-    <div class="message-box">
-        <div class="sender">[AI코드학원]</div>
-        <div class="body">
-            오늘도 퀴즈 시간입니다!<br>
-            <span class="link">https://aicode-study.kr/q?data=dHJ1c3Rfbm9ib2R5</span>
-            <div class="note">※ 퀴즈는 전용 앱을 이용해서 풀어주세요~ 😊</div>
-        </div>
-
-        <div class="answer-section">
-            <input type="text" id="answer" placeholder="결과 입력">
-            <button onclick="checkAnswer()">제출</button>
-            <div id="feedback" class="feedback"></div>
-        </div>
-        <div class="button-row">
-            <button class="classroom-button" onclick="location.href='classroom_scene.html'">교실로</button>
-            <button class="home-button" onclick="location.href='home_screen.html'">태블릿 홈으로</button>
-        </div>
-
+  <div class="message-box">
+    <div class="sender">[AI코드학원]</div>
+    <div class="body">
+      오늘도 퀴즈 시간입니다!<br>
+      <span class="link">https://aicode-study.kr/q?data=dHJ1c3Rfbm9ib2R5</span>
+      <div class="note">※ 퀴즈는 전용 앱을 이용해서 풀어주세요~ 😊</div>
     </div>
+
+    <div class="answer-section">
+      <input type="text" id="answer" placeholder="결과 입력">
+      <button onclick="checkAnswer()">제출</button>
+      <div id="feedback" class="feedback"></div>
+    </div>
+    <div class="button-row">
+      <button class="classroom-button" onclick="location.href='classroom_scene.html'">교실로</button>
+      <button class="home-button" onclick="location.href='home_screen.html'">태블릿 홈으로</button>
+    </div>
+  </div>
 
   <script>
     function checkAnswer() {
@@ -123,6 +118,13 @@
       if (input === "trust_nobody") {
         feedback.style.color = "#00ff88";
         feedback.innerText = "FLAG{ARE}";
+
+        // 3초 후 university/1step.html로 이동
+        setTimeout(() => {
+          window.location.href = "../university/1step.html"; 
+          // 상대 경로 주의: 현재 HTML 파일 위치에 따라 "../university/1step.html"이 될 수도 있음
+        }, 3000);
+
       } else {
         feedback.style.color = "red";
         feedback.innerText = "다시 시도해보세요.";
