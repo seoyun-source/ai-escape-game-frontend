@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>너의 기억은 조작되었다 – Re:AL (Real AI Life)</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            height: 100vh;
+            overflow: hidden;
+            background: linear-gradient(45deg, #1a1a2e, #2d2d3a, #1f1f2f);
+            background-size: 400% 400%;
+            animation: darkShift 15s ease infinite;
+            position: relative;
+        }
+
+        @keyframes darkShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* 스캔라인 효과 */
+        .scanlines::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                transparent 50%,
+                rgba(255, 255, 255, 0.03) 50%
+            );
+            background-size: 100% 4px;
+            pointer-events: none;
+            z-index: 5;
+            animation: scan 0.1s linear infinite;
+        }
+
+        @keyframes scan {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(4px); }
+        }
+
+        /* 글리치 효과 */
+        .glitch::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 0, 0, 0.03), transparent);
+            animation: glitchSweep 3s infinite;
+            pointer-events: none;
+            z-index: 6;
+        }
+
+        @keyframes glitchSweep {
+            0%, 95% { transform: translateX(-100%); }
+            96%, 100% { transform: translateX(100%); }
+        }
+
+        /* 배경 파티클 효과 */
+        .particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .particle {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 50%;
+            animation: eerieFloat 12s ease-in-out infinite;
+        }
+
+        @keyframes eerieFloat {
+            0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 0.1; }
+            25% { transform: translateY(-15px) rotate(90deg); opacity: 0.3; }
+            75% { transform: translateY(-30px) rotate(270deg); opacity: 0.2; }
+        }
+
+        /* 섬뜩한 노이즈 파티클 */
+        .noise-particle {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            background: rgba(255, 255, 255, 0.1);
+            animation: noise 0.5s infinite;
+        }
+
+        @keyframes noise {
+            0%, 100% { opacity: 0; }
+            50% { opacity: 0.3; }
+        }
+
+        /* 메인 컨테이너 */
+        .main-container {
+            position: relative;
+            z-index: 10;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        /* 게임 타이틀 */
+        .game-title {
+            margin-bottom: 20px;
+            opacity: 0;
+            animation: titleAppear 3s ease-out 1s forwards;
+        }
+
+        .title-main {
+            font-size: 4.5rem;
+            font-weight: bold;
+            background: linear-gradient(45deg, #cc6666, #888888, #666666, #444444);
+            background-size: 300% 300%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: ominousGradient 4s ease infinite, textGlitch 8s infinite;
+            text-shadow: 0 0 20px rgba(204, 102, 102, 0.4);
+            margin-bottom: 10px;
+            position: relative;
+        }
+
+        .title-main::before {
+            content: 'Re:AL';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, #ff4444, #cc3333);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            opacity: 0;
+            animation: glitchFlicker 10s infinite;
+        }
+
+        @keyframes textGlitch {
+            0%, 98% { transform: translateX(0); }
+            98.5% { transform: translateX(-2px); }
+            99% { transform: translateX(2px); }
+            99.5% { transform: translateX(-1px); }
+        }
+
+        @keyframes glitchFlicker {
+            0%, 96% { opacity: 0; }
+            96.5%, 97% { opacity: 0.8; }
+            97.5%, 98% { opacity: 0; }
+            98.5%, 99% { opacity: 0.6; }
+        }
+
+        .title-sub {
+            font-size: 1.5rem;
+            color: rgba(255, 255, 255, 0.85);
+            font-weight: 300;
+            letter-spacing: 3px;
+            margin-bottom: 20px;
+            animation: subtitleFlicker 6s infinite;
+        }
+
+        @keyframes subtitleFlicker {
+            0%, 98% { opacity: 0.85; }
+            98.5%, 99% { opacity: 0.5; }
+            99.5% { opacity: 0.95; }
+        }
+
+        .title-desc {
+            font-size: 1rem;
+            color: rgba(255, 255, 255, 0.75);
+            max-width: 700px;
+            line-height: 1.8;
+            margin: 0 auto;
+            animation: descriptionPulse 4s ease-in-out infinite;
+        }
+
+        @keyframes descriptionPulse {
+            0%, 100% { opacity: 0.75; }
+            50% { opacity: 0.9; }
+        }
+
+        .title-desc strong {
+            color: #cc6666;
+            text-shadow: 0 0 10px rgba(204, 102, 102, 0.6);
+            animation: dangerGlow 3s ease-in-out infinite alternate;
+        }
+
+        @keyframes dangerGlow {
+            from { text-shadow: 0 0 10px rgba(204, 102, 102, 0.6); }
+            to { text-shadow: 0 0 15px rgba(204, 102, 102, 0.9); }
+        }
+
+        @keyframes titleAppear {
+            from { opacity: 0; transform: translateY(50px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes ominousGradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* 메뉴 버튼들 */
+        .menu-buttons {
+            margin-top: 50px;
+            opacity: 0;
+            animation: buttonsAppear 2s ease-out 2.5s forwards;
+        }
+
+        .menu-btn {
+            display: block;
+            width: 300px;
+            margin: 20px auto;
+            padding: 18px 40px;
+            font-size: 1.3rem;
+            font-weight: 500;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+            backdrop-filter: blur(10px);
+        }
+
+        .menu-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
+            transition: left 0.6s;
+            z-index: -1;
+        }
+
+        .menu-btn:hover::before {
+            left: 100%;
+        }
+
+        .start-btn {
+            background: linear-gradient(45deg, rgba(204, 102, 102, 0.4), rgba(180, 80, 80, 0.5));
+            color: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 8px 25px rgba(204, 102, 102, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+            transform: translateY(0);
+            animation: dangerPulse 4s ease-in-out infinite;
+        }
+
+        @keyframes dangerPulse {
+            0%, 100% { box-shadow: 0 8px 25px rgba(204, 102, 102, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.15); }
+            50% { box-shadow: 0 8px 30px rgba(204, 102, 102, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.25); }
+        }
+
+        .start-btn:hover {
+            background: linear-gradient(45deg, rgba(204, 102, 102, 0.6), rgba(180, 80, 80, 0.7));
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(204, 102, 102, 0.5);
+        }
+
+        .info-btn {
+            background: linear-gradient(45deg, rgba(120, 120, 120, 0.4), rgba(100, 100, 100, 0.5));
+            color: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+        }
+
+        .info-btn:hover {
+            background: linear-gradient(45deg, rgba(120, 120, 120, 0.6), rgba(100, 100, 100, 0.7));
+            transform: translateY(-3px);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .settings-btn {
+            background: linear-gradient(45deg, rgba(80, 80, 80, 0.4), rgba(60, 60, 60, 0.5));
+            color: rgba(255, 255, 255, 0.85);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+        }
+
+        .settings-btn:hover {
+            background: linear-gradient(45deg, rgba(80, 80, 80, 0.6), rgba(60, 60, 60, 0.7));
+            transform: translateY(-3px);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        @keyframes buttonsAppear {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* 모달 창 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(15px);
+            z-index: 1000;
+            animation: modalFadeIn 0.3s ease-out;
+        }
+
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(145deg, rgba(20, 20, 30, 0.95), rgba(10, 10, 20, 0.98));
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 600px;
+            width: 90%;
+            color: white;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+            border: 1px solid rgba(139, 0, 0, 0.3);
+        }
+
+        .modal h2 {
+            color: #cc6666;
+            margin-bottom: 25px;
+            font-size: 2rem;
+            text-align: center;
+            text-shadow: 0 0 10px rgba(204, 102, 102, 0.5);
+        }
+
+        .modal p {
+            line-height: 1.8;
+            margin-bottom: 20px;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1.1rem;
+        }
+
+        .modal-close {
+            background: linear-gradient(45deg, rgba(204, 102, 102, 0.7), rgba(180, 80, 80, 0.9));
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            float: right;
+            margin-top: 20px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .modal-close:hover {
+            background: linear-gradient(45deg, rgba(204, 102, 102, 0.9), rgba(180, 80, 80, 1));
+            transform: translateY(-2px);
+        }
+
+        @keyframes modalFadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* 특정 색상 강조 요소들 */
+        .modal h3[style*="color: #d4a5a5"] {
+            color: #8b0000 !important;
+            text-shadow: 0 0 5px rgba(139, 0, 0, 0.5);
+        }
+
+        .modal h3[style*="color: #a5c4c4"] {
+            color: #666666 !important;
+        }
+
+        /* 반응형 디자인 */
+        @media (max-width: 768px) {
+            .title-main {
+                font-size: 3rem;
+            }
+            
+            .title-sub {
+                font-size: 1.2rem;
+            }
+            
+            .menu-btn {
+                width: 250px;
+                font-size: 1.1rem;
+            }
+            
+            .modal-content {
+                padding: 30px;
+                margin: 20px;
+            }
+        }
+
+        /* 로딩 애니메이션 */
+        .loading {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 2000;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(255, 255, 255, 0.2);
+            border-top: 4px solid #cc6666;
+            border-radius: 50%;
+            animation: ominousSpin 2s linear infinite;
+        }
+
+        @keyframes ominousSpin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* 설정 모달 내부 요소들 색상 조정 */
+        input[type="range"] {
+            accent-color: #8b0000;
+        }
+
+        button[onclick="clearGameData()"] {
+            background: rgba(139, 0, 0, 0.8) !important;
+        }
+
+        button[onclick="clearGameData()"]:hover {
+            background: rgba(139, 0, 0, 1) !important;
+        }
+
+        /* 미묘한 화면 왜곡 효과 */
+        .distortion {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 3;
+            background: radial-gradient(circle at 50% 50%, transparent 0%, rgba(0, 0, 0, 0.1) 100%);
+            animation: subtleDistortion 20s ease-in-out infinite;
+        }
+
+        @keyframes subtleDistortion {
+            0%, 100% { transform: scale(1); opacity: 0.3; }
+            50% { transform: scale(1.01); opacity: 0.1; }
+        }
+    </style>
+</head>
+<body class="scanlines glitch">
+    <!-- 화면 왜곡 효과 -->
+    <div class="distortion"></div>
+
+    <!-- 배경 파티클 -->
+    <div class="particles" id="particles"></div>
+
+    <!-- 메인 컨테이너 -->
+    <div class="main-container">
+        <div class="game-title">
+            <h1 class="title-main">Re:AL</h1>
+            <p class="title-sub">너의 기억은 조작되었다</p>
+            <p class="title-desc">
+                <strong>지금까지의 삶이 전부 AI 시뮬레이션이었다.</strong><br>
+                가짜 기억과 보안 퍼즐을 통과해 현실로 탈출하자.
+            </p>
+        </div>
+
+        <div class="menu-buttons">
+            <button class="menu-btn start-btn" onclick="startGame()">
+                🚪 시뮬레이션 탈출 시작
+            </button>
+            <button class="menu-btn info-btn" onclick="showInfo()">
+                📖 게임 정보
+            </button>
+            <button class="menu-btn settings-btn" onclick="showSettings()">
+                ⚙️ 설정
+            </button>
+        </div>
+    </div>
+
+    <!-- 게임 정보 모달 -->
+    <div class="modal" id="infoModal">
+        <div class="modal-content">
+            <h2>🎯 게임 정보</h2>
+            <p><strong>장르:</strong> AI 시뮬레이션 탈출 퍼즐</p>
+            
+            <h3 style="color: #8b0000; margin-top: 25px; margin-bottom: 15px;">🌐 배경 스토리</h3>
+            <p>• AI는 인간의 보안 의식을 테스트하기 위해 가짜 삶을 심어놓고, 그 데이터를 분석하고 있었어</p>
+            <p>• 너는 "진짜" 현실로 탈출하기 위해 가짜 기억과 보안 퍼즐이 얽힌 방을 통과해야 해</p>
+            <p>• 각 방은 <strong>너의 '과거 기억'에 숨겨진 보안 이슈</strong>를 기반으로 구성돼</p>
+            
+            <h3 style="color: #666666; margin-top: 25px; margin-bottom: 15px;">🔐 게임 방식</h3>
+            <p>• 힌트를 통해 보안 퍼즐을 해결하세요</p>
+            <p>• 단어들을 조합하여 숨겨진 메시지를 완성하세요</p>
+            
+            <button class="modal-close" onclick="closeModal('infoModal')">확인</button>
+        </div>
+    </div>
+
+    <!-- 설정 모달 -->
+    <div class="modal" id="settingsModal">
+        <div class="modal-content">
+            <h2>⚙️ 설정</h2>
+            
+            <div style="margin: 25px 0;">
+                <label style="display: block; margin-bottom: 10px; color: #666666;">🔊 효과음</label>
+                <input type="range" id="soundVolume" min="0" max="100" value="50" 
+                       style="width: 100%; margin-bottom: 15px;"
+                       oninput="updateVolume(this.value)">
+                <span id="volumeDisplay" style="color: rgba(255, 255, 255, 0.6);">50%</span>
+            </div>
+            
+            <div style="margin: 25px 0;">
+                <label style="display: block; margin-bottom: 10px; color: #666666;">🌙 다크 모드</label>
+                <input type="checkbox" id="darkMode" checked onchange="toggleDarkMode()" 
+                       style="transform: scale(1.5); margin-right: 10px;">
+                <span style="color: rgba(255, 255, 255, 0.6);">활성화</span>
+            </div>
+            
+            <div style="margin: 25px 0;">
+                <label style="display: block; margin-bottom: 10px; color: #666666;">💾 데이터 관리</label>
+                <button onclick="clearGameData()" 
+                        style="background: rgba(139, 0, 0, 0.8); color: white; border: none; padding: 8px 20px; border-radius: 15px; cursor: pointer; margin-right: 10px;">
+                    게임 데이터 삭제
+                </button>
+                <span style="color: rgba(255, 255, 255, 0.4); font-size: 0.9rem;">
+                    (진행상황이 모두 삭제됩니다)
+                </span>
+            </div>
+            
+            <button class="modal-close" onclick="closeModal('settingsModal')">확인</button>
+        </div>
+    </div>
+
+    <!-- 로딩 화면 -->
+    <div class="loading" id="loading">
+        <div class="loading-spinner"></div>
+    </div>
+
+    <script>
+        // 페이지 로드 시 파티클 생성
+        window.onload = function() {
+            createParticles();
+            createNoiseParticles();
+            loadSettings();
+        };
+
+        // 파티클 생성
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            const particleCount = 40;
+
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                
+                // 랜덤 크기와 위치
+                const size = Math.random() * 3 + 1;
+                const x = Math.random() * 100;
+                const y = Math.random() * 100;
+                const delay = Math.random() * 12;
+                
+                particle.style.width = size + 'px';
+                particle.style.height = size + 'px';
+                particle.style.left = x + '%';
+                particle.style.top = y + '%';
+                particle.style.animationDelay = delay + 's';
+                
+                particlesContainer.appendChild(particle);
+            }
+        }
+
+        // 노이즈 파티클 생성
+        function createNoiseParticles() {
+            const particlesContainer = document.getElementById('particles');
+            const noiseCount = 100;
+
+            for (let i = 0; i < noiseCount; i++) {
+                const noise = document.createElement('div');
+                noise.className = 'noise-particle';
+                
+                const x = Math.random() * 100;
+                const y = Math.random() * 100;
+                const delay = Math.random() * 2;
+                
+                noise.style.left = x + '%';
+                noise.style.top = y + '%';
+                noise.style.animationDelay = delay + 's';
+                
+                particlesContainer.appendChild(noise);
+            }
+        }
+
+        // 게임 시작
+        function startGame() {
+            showLoading();
+            
+            // 2초 후 첫 번째 스테이지로 이동
+            setTimeout(() => {
+                hideLoading();
+                window.location.href = 'stage0_intro.html';
+            }, 2000);
+        }
+
+        // 게임 정보 모달 표시
+        function showInfo() {
+            document.getElementById('infoModal').style.display = 'block';
+        }
+
+        // 설정 모달 표시
+        function showSettings() {
+            document.getElementById('settingsModal').style.display = 'block';
+        }
+
+        // 모달 닫기
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        // 모달 외부 클릭 시 닫기
+        window.onclick = function(event) {
+            const modals = document.querySelectorAll('.modal');
+            modals.forEach(modal => {
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
+        };
+
+        // 로딩 화면 표시/숨김
+        function showLoading() {
+            document.getElementById('loading').style.display = 'block';
+        }
+
+        function hideLoading() {
+            document.getElementById('loading').style.display = 'none';
+        }
+
+        // 볼륨 조절
+        function updateVolume(value) {
+            document.getElementById('volumeDisplay').textContent = value + '%';
+            localStorage.setItem('gameVolume', value);
+        }
+
+        // 다크 모드 토글
+        function toggleDarkMode() {
+            const darkMode = document.getElementById('darkMode').checked;
+            localStorage.setItem('darkMode', darkMode);
+            
+            if (!darkMode) {
+                document.body.style.background = 'linear-gradient(45deg, #f8f9fa, #e9ecef, #dee2e6)';
+            } else {
+                document.body.style.background = 'linear-gradient(45deg, #0a0a0a, #1a1a2e, #0f0f1f)';
+            }
+        }
+
+        // 게임 데이터 삭제
+        function clearGameData() {
+            if (confirm('정말로 모든 게임 데이터를 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.')) {
+                localStorage.clear();
+                alert('게임 데이터가 삭제되었습니다.');
+                location.reload();
+            }
+        }
+
+        // 설정 불러오기
+        function loadSettings() {
+            const volume = localStorage.getItem('gameVolume') || 50;
+            const darkMode = localStorage.getItem('darkMode') !== 'false';
+            
+            document.getElementById('soundVolume').value = volume;
+            document.getElementById('volumeDisplay').textContent = volume + '%';
+            document.getElementById('darkMode').checked = darkMode;
+            
+            if (!darkMode) {
+                toggleDarkMode();
+            }
+        }
+
+        // 키보드 단축키
+        document.addEventListener('keydown', function(event) {
+            switch(event.key) {
+                case 'Enter':
+                    startGame();
+                    break;
+                case 'Escape':
+                    // 열린 모달 닫기
+                    const openModal = document.querySelector('.modal[style*="block"]');
+                    if (openModal) {
+                        openModal.style.display = 'none';
+                    }
+                    break;
+                case 'i':
+                case 'I':
+                    showInfo();
+                    break;
+                case 's':
+                case 'S':
+                    showSettings();
+                    break;
+            }
+        });
+
+        // 게임 시작 버튼에 섬뜩한 효과 추가
+        setInterval(() => {
+            const startBtn = document.querySelector('.start-btn');
+            startBtn.style.transform = 'translateY(-3px) scale(1.01)';
+            setTimeout(() => {
+                startBtn.style.transform = 'translateY(0) scale(1)';
+            }, 300);
+        }, 5000);
+
+        // 랜덤 글리치 효과
+        setInterval(() => {
+            const title = document.querySelector('.title-main');
+            title.style.transform = 'translateX(' + (Math.random() * 4 - 2) + 'px)';
+            setTimeout(() => {
+                title.style.transform = 'translateX(0)';
+            }, 50);
+        }, 8000 + Math.random() * 10000);
+    </script>
+</body>
+</html>
