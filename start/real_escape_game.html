@@ -690,9 +690,7 @@
             // 2초 후 다음 페이지로 이동 (예시)
             setTimeout(() => {
                 hideLoading();
-                // 여기에 다른 분의 HTML로 이동하는 코드 추가
-                // 예: window.location.href = 'stage1.html?nickname=' + encodeURIComponent(nickname);
-                // 또는 sessionStorage.setItem('nickname', nickname); 후 페이지 이동
+                window.location.href = '../fresh/wakeup_scene.html';
                 alert(`환영합니다, ${nickname}님! 여기서 다른 HTML로 이동하면 됩니다.`);
             }, 2000);
         }
