@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8" />
     <title>너의 기억은 조작되었다 – Re:AL (Real AI Life)</title>
     <style>
         * {
@@ -375,9 +375,7 @@
         }
 
         /* 닉네임 입력 모달 */
-        .nickname-modal .modal-content {
-            max-width: 450px;
-        }
+        .nickname-modal .modal-content { max-width: 450px; }
 
         .nickname-input {
             width: 100%;
@@ -394,9 +392,7 @@
             border: 1px solid rgba(204, 102, 102, 0.3);
         }
 
-        .nickname-input::placeholder {
-            color: rgba(255, 255, 255, 0.5);
-        }
+        .nickname-input::placeholder { color: rgba(255, 255, 255, 0.5); }
 
         .nickname-input:focus {
             outline: none;
@@ -405,10 +401,7 @@
             box-shadow: 0 0 20px rgba(204, 102, 102, 0.3);
         }
 
-        .modal-btn-group {
-            text-align: center;
-            margin-top: 20px;
-        }
+        .modal-btn-group { text-align: center; margin-top: 20px; }
 
         .modal-btn {
             background: linear-gradient(45deg, rgba(204, 102, 102, 0.7), rgba(180, 80, 80, 0.9));
@@ -427,33 +420,19 @@
             transform: translateY(-2px);
         }
 
-        .modal-btn.cancel {
-            background: linear-gradient(45deg, rgba(80, 80, 80, 0.7), rgba(60, 60, 60, 0.9));
-        }
+        .modal-btn.cancel { background: linear-gradient(45deg, rgba(80, 80, 80, 0.7), rgba(60, 60, 60, 0.9)); }
+        .modal-btn.cancel:hover { background: linear-gradient(45deg, rgba(80, 80, 80, 0.9), rgba(60, 60, 60, 1)); }
 
-        .modal-btn.cancel:hover {
-            background: linear-gradient(45deg, rgba(80, 80, 80, 0.9), rgba(60, 60, 60, 1));
-        }
+        /* 슬라이더 간단 스타일 */
+        .slider { width: 100%; }
+        .volume-text { margin-left: 10px; color: rgba(255, 255, 255, 0.8); }
 
         /* 반응형 디자인 */
         @media (max-width: 768px) {
-            .title-main {
-                font-size: 3rem;
-            }
-            
-            .title-sub {
-                font-size: 1.2rem;
-            }
-            
-            .menu-btn {
-                width: 250px;
-                font-size: 1.1rem;
-            }
-            
-            .modal-content {
-                padding: 30px;
-                margin: 20px;
-            }
+            .title-main { font-size: 3rem; }
+            .title-sub { font-size: 1.2rem; }
+            .menu-btn { width: 250px; font-size: 1.1rem; }
+            .modal-content { padding: 30px; margin: 20px; }
         }
 
         /* 로딩 애니메이션 */
@@ -475,10 +454,7 @@
             animation: ominousSpin 2s linear infinite;
         }
 
-        @keyframes ominousSpin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
+        @keyframes ominousSpin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
         /* 미묘한 화면 왜곡 효과 */
         .distortion {
@@ -506,13 +482,19 @@
     <!-- 배경 파티클 -->
     <div class="particles" id="particles"></div>
 
+    <!-- 🔊 BGM (사용자 상호작용 후 재생) -->
+    <audio id="bgm" preload="auto" loop>
+        <source src="bgm.mp3" type="audio/mpeg" />
+        브라우저가 오디오를 지원하지 않습니다.
+    </audio>
+
     <!-- 메인 컨테이너 -->
     <div class="main-container">
         <div class="game-title">
             <h1 class="title-main">Re:AL</h1>
             <p class="title-sub">너의 기억은 조작되었다</p>
             <p class="title-desc">
-                <strong>지금까지의 삶이 전부 AI 시뮬레이션이었다.</strong><br>
+                <strong>지금까지의 삶이 전부 AI 시뮬레이션이었다.</strong><br />
                 가짜 기억과 보안 퍼즐을 통과해 현실로 탈출하자.
             </p>
         </div>
@@ -535,12 +517,12 @@
         <div class="modal-content">
             <h2>🤖 시뮬레이션 접속</h2>
             <p style="text-align: center; margin-bottom: 30px;">
-                AI 시스템에 등록할 식별명을 입력하세요.<br>
+                AI 시스템에 등록할 식별명을 입력하세요.<br />
                 <span style="color: #888; font-size: 0.9em;">
                     (이 이름으로 탈출 기록이 저장됩니다)
                 </span>
             </p>
-            <input type="text" class="nickname-input" id="nicknameInput" placeholder="식별명을 입력하세요" maxlength="15">
+            <input type="text" class="nickname-input" id="nicknameInput" placeholder="식별명을 입력하세요" maxlength="15" />
             <div class="modal-btn-group">
                 <button class="modal-btn" onclick="startGameWithNickname()">🚀 시뮬레이션 시작</button>
                 <button class="modal-btn cancel" onclick="closeModal('nicknameModal')">취소</button>
@@ -548,97 +530,45 @@
         </div>
     </div>
 
-<!-- 게임 정보 모달 -->
-<div class="modal" id="infoModal">
-    <div class="modal-content">
-        <h2>🎯 게임 정보</h2>
-        <p><strong>장르:</strong> AI 시뮬레이션 탈출 퍼즐</p>
-        
-        <h3 style="color: #8b0000; margin-top: 25px; margin-bottom: 15px;">🌐 배경 스토리</h3>
-        <p>• AI는 인간의 보안 의식을 테스트하기 위해 가짜 삶을 심어놓고, 그 데이터를 분석하고 있었어</p>
-        <p>• 너는 "진짜" 현실로 탈출하기 위해 가짜 기억과 보안 퍼즐이 얽힌 방을 통과해야 해</p>
-        <p>• 각 방은 <strong>너의 '과거 기억'에 숨겨진 보안 이슈</strong>를 기반으로 구성돼</p>
-        
-        <h3 style="color: #666666; margin-top: 25px; margin-bottom: 15px;">🔐 게임 방식</h3>
-        <p>• 힌트를 통해 보안 퍼즐을 해결하세요</p>
-        <p>• 단어들을 조합하여 숨겨진 메시지를 완성하세요</p>
-        
-        <button class="modal-close" onclick="closeModal('infoModal')">확인</button>
+    <!-- 게임 정보 모달 -->
+    <div class="modal" id="infoModal">
+        <div class="modal-content">
+            <h2>🎯 게임 정보</h2>
+            <p><strong>장르:</strong> AI 시뮬레이션 탈출 퍼즐</p>
+            <h3 style="color: #8b0000; margin-top: 25px; margin-bottom: 15px;">🌐 배경 스토리</h3>
+            <p>• AI는 인간의 보안 의식을 테스트하기 위해 가짜 삶을 심어놓고, 그 데이터를 분석하고 있었어</p>
+            <p>• 너는 "진짜" 현실로 탈출하기 위해 가짜 기억과 보안 퍼즐이 얽힌 방을 통과해야 해</p>
+            <p>• 각 방은 <strong>너의 '과거 기억'에 숨겨진 보안 이슈</strong>를 기반으로 구성돼</p>
+            <h3 style="color: #666666; margin-top: 25px; margin-bottom: 15px;">🔐 게임 방식</h3>
+            <p>• 힌트를 통해 보안 퍼즐을 해결하세요</p>
+            <p>• 단어들을 조합하여 숨겨진 메시지를 완성하세요</p>
+            <button class="modal-close" onclick="closeModal('infoModal')">확인</button>
+        </div>
     </div>
-</div>
-
-<style>
-/* 모달 배경 */
-.modal {
-    display: none; /* 기본은 숨김 */
-    position: fixed;
-    z-index: 999;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    overflow: hidden; /* 배경은 스크롤 안되게 */
-    background-color: rgba(0,0,0,0.5);
-}
-
-/* 모달 콘텐츠 */
-.modal-content {
-    background-color: white;
-    margin: 5% auto;
-    padding: 20px;
-    border-radius: 10px;
-    width: 80%;
-    max-width: 500px;
-
-    /* 스크롤 가능 설정 */
-    max-height: 80vh; /* 화면 높이의 80%까지만 */
-    overflow-y: auto; /* 세로 스크롤 */
-    padding-right: 10px; /* 스크롤바 여백 */
-}
-
-/* 닫기 버튼 스타일 */
-.modal-close {
-    background-color: #4CAF50;
-    color: white;
-    border: none;
-    padding: 10px 15px;
-    border-radius: 5px;
-    cursor: pointer;
-}
-</style>
-
 
     <!-- 설정 모달 -->
     <div class="modal" id="settingsModal">
         <div class="modal-content">
             <h2>⚙️ 설정</h2>
-            
+
             <div style="margin: 25px 0;">
-                <label style="display: block; margin-bottom: 10px; color: #666666;">🔊 효과음</label>
-                <input type="range" id="soundVolume" min="0" max="100" value="50" 
-                       style="width: 100%; margin-bottom: 15px;"
-                       oninput="updateVolume(this.value)">
-                <span id="volumeDisplay" style="color: rgba(255, 255, 255, 0.6);">50%</span>
+                <label style="display: block; margin-bottom: 10px; color: #ccc;">🎶 배경음악</label>
+                <input type="range" id="bgmVolume" min="0" max="100" value="50" class="slider" oninput="updateBgmVolume(this.value)" />
+                <span id="bgmVolumeDisplay" class="volume-text">50%</span>
             </div>
-            
+
             <div style="margin: 25px 0;">
                 <label style="display: block; margin-bottom: 10px; color: #666666;">🌙 다크 모드</label>
-                <input type="checkbox" id="darkMode" checked onchange="toggleDarkMode()" 
-                       style="transform: scale(1.5); margin-right: 10px;">
+                <input type="checkbox" id="darkMode" checked onchange="toggleDarkMode()" style="transform: scale(1.5); margin-right: 10px;" />
                 <span style="color: rgba(255, 255, 255, 0.6);">활성화</span>
             </div>
-            
+
             <div style="margin: 25px 0;">
                 <label style="display: block; margin-bottom: 10px; color: #666666;">💾 데이터 관리</label>
-                <button onclick="clearGameData()" 
-                        style="background: rgba(139, 0, 0, 0.8); color: white; border: none; padding: 8px 20px; border-radius: 15px; cursor: pointer; margin-right: 10px;">
-                    게임 데이터 삭제
-                </button>
-                <span style="color: rgba(255, 255, 255, 0.4); font-size: 0.9rem;">
-                    (진행상황이 모두 삭제됩니다)
-                </span>
+                <button onclick="clearGameData()" style="background: rgba(139, 0, 0, 0.8); color: white; border: none; padding: 8px 20px; border-radius: 15px; cursor: pointer; margin-right: 10px;">게임 데이터 삭제</button>
+                <span style="color: rgba(255, 255, 255, 0.4); font-size: 0.9rem;">(진행상황이 모두 삭제됩니다)</span>
             </div>
-            
+
             <button class="modal-close" onclick="closeModal('settingsModal')">확인</button>
         </div>
     </div>
@@ -655,7 +585,7 @@
             darkMode: true
         };
 
-        // 페이지 로드 시 파티클 생성
+        // 페이지 로드 시 파티클 생성 및 설정 불러오기
         window.onload = function() {
             createParticles();
             createNoiseParticles();
@@ -666,23 +596,18 @@
         function createParticles() {
             const particlesContainer = document.getElementById('particles');
             const particleCount = 40;
-
             for (let i = 0; i < particleCount; i++) {
                 const particle = document.createElement('div');
                 particle.className = 'particle';
-                
-                // 랜덤 크기와 위치
                 const size = Math.random() * 3 + 1;
                 const x = Math.random() * 100;
                 const y = Math.random() * 100;
                 const delay = Math.random() * 12;
-                
                 particle.style.width = size + 'px';
                 particle.style.height = size + 'px';
                 particle.style.left = x + '%';
                 particle.style.top = y + '%';
                 particle.style.animationDelay = delay + 's';
-                
                 particlesContainer.appendChild(particle);
             }
         }
@@ -691,19 +616,15 @@
         function createNoiseParticles() {
             const particlesContainer = document.getElementById('particles');
             const noiseCount = 100;
-
             for (let i = 0; i < noiseCount; i++) {
                 const noise = document.createElement('div');
                 noise.className = 'noise-particle';
-                
                 const x = Math.random() * 100;
                 const y = Math.random() * 100;
                 const delay = Math.random() * 2;
-                
                 noise.style.left = x + '%';
                 noise.style.top = y + '%';
                 noise.style.animationDelay = delay + 's';
-                
                 particlesContainer.appendChild(noise);
             }
         }
@@ -714,20 +635,30 @@
             document.getElementById('nicknameInput').focus();
         }
 
-        // 닉네임과 함께 게임 시작
+        // 닉네임과 함께 게임 시작 (여기서 BGM 재생 시작)
         function startGameWithNickname() {
             const nickname = document.getElementById('nicknameInput').value.trim();
             if (!nickname) {
-                alert("식별명을 입력해주세요!");
+                alert('식별명을 입력해주세요!');
                 return;
             }
 
-            // 닉네임 저장 (다른 페이지에서 사용할 수 있도록)
-            // 여기서 다른 HTML 페이지로 이동하거나 데이터 전달
-            
+            // 🎵 버튼 클릭(사용자 상호작용) 이후 BGM 재생
+            const audio = document.getElementById('bgm');
+            try {
+                audio.volume = gameSettings.volume / 100;
+                const p = audio.play();
+                if (p && typeof p.then === 'function') {
+                    p.catch(() => {
+                        // 모바일/브라우저 정책으로 막힐 경우 대비
+                        console.log('Autoplay policy prevented immediate play.');
+                    });
+                }
+            } catch (e) { console.warn(e); }
+
             closeModal('nicknameModal');
             showLoading();
-            
+
             // 2초 후 다음 페이지로 이동 (예시)
             setTimeout(() => {
                 hideLoading();
@@ -741,46 +672,43 @@
             document.getElementById('infoModal').style.display = 'block';
         }
 
-        // 설정 모달 표시
+        // 설정 모달 표시 (현재 볼륨 값 반영)
         function showSettings() {
-            document.getElementById('settingsModal').style.display = 'block';
+            const modal = document.getElementById('settingsModal');
+            document.getElementById('bgmVolume').value = gameSettings.volume;
+            document.getElementById('bgmVolumeDisplay').textContent = gameSettings.volume + '%';
+            modal.style.display = 'block';
         }
 
         // 모달 닫기
-        function closeModal(modalId) {
-            document.getElementById(modalId).style.display = 'none';
+        function closeModal(id) {
+            document.getElementById(id).style.display = 'none';
         }
 
         // 모달 외부 클릭 시 닫기
         window.onclick = function(event) {
             const modals = document.querySelectorAll('.modal');
             modals.forEach(modal => {
-                if (event.target === modal) {
-                    modal.style.display = 'none';
-                }
+                if (event.target === modal) modal.style.display = 'none';
             });
         };
 
         // 로딩 화면 표시/숨김
-        function showLoading() {
-            document.getElementById('loading').style.display = 'block';
-        }
+        function showLoading() { document.getElementById('loading').style.display = 'block'; }
+        function hideLoading() { document.getElementById('loading').style.display = 'none'; }
 
-        function hideLoading() {
-            document.getElementById('loading').style.display = 'none';
-        }
-
-        // 볼륨 조절
-        function updateVolume(value) {
-            document.getElementById('volumeDisplay').textContent = value + '%';
-            gameSettings.volume = value;
+        // 🔊 볼륨 조절 (슬라이더 연결)
+        function updateBgmVolume(value) {
+            const audio = document.getElementById('bgm');
+            audio.volume = value / 100; // 0.0 ~ 1.0
+            document.getElementById('bgmVolumeDisplay').textContent = value + '%';
+            gameSettings.volume = Number(value);
         }
 
         // 다크 모드 토글
         function toggleDarkMode() {
             const darkMode = document.getElementById('darkMode').checked;
             gameSettings.darkMode = darkMode;
-            
             if (!darkMode) {
                 document.body.style.background = 'linear-gradient(45deg, #f8f9fa, #e9ecef, #dee2e6)';
             } else {
@@ -791,20 +719,21 @@
         // 게임 데이터 삭제
         function clearGameData() {
             if (confirm('정말로 모든 게임 데이터를 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.')) {
+                localStorage.clear();
                 alert('게임 데이터가 삭제되었습니다.');
                 location.reload();
             }
         }
 
-        // 설정 불러오기
+        // 설정 불러오기 (초기 값 적용)
         function loadSettings() {
-            document.getElementById('soundVolume').value = gameSettings.volume;
-            document.getElementById('volumeDisplay').textContent = gameSettings.volume + '%';
-            document.getElementById('darkMode').checked = gameSettings.darkMode;
-            
-            if (!gameSettings.darkMode) {
-                toggleDarkMode();
+            const volEl = document.getElementById('bgmVolume');
+            const volText = document.getElementById('bgmVolumeDisplay');
+            if (volEl && volText) {
+                volEl.value = gameSettings.volume;
+                volText.textContent = gameSettings.volume + '%';
             }
+            document.getElementById('darkMode').checked = gameSettings.darkMode;
         }
 
         // 키보드 단축키
@@ -820,28 +749,17 @@
             // 전역 키보드 단축키
             switch(event.key) {
                 case 'Enter':
-                    if (!document.querySelector('.modal[style*="block"]')) {
-                        showNicknameModal();
-                    }
+                    if (!document.querySelector('.modal[style*="block"]')) showNicknameModal();
                     break;
                 case 'Escape':
-                    // 열린 모달 닫기
                     const openModal = document.querySelector('.modal[style*="block"]');
-                    if (openModal) {
-                        openModal.style.display = 'none';
-                    }
+                    if (openModal) openModal.style.display = 'none';
                     break;
-                case 'i':
-                case 'I':
-                    if (!document.querySelector('.modal[style*="block"]')) {
-                        showInfo();
-                    }
+                case 'i': case 'I':
+                    if (!document.querySelector('.modal[style*="block"]')) showInfo();
                     break;
-                case 's':
-                case 'S':
-                    if (!document.querySelector('.modal[style*="block"]')) {
-                        showSettings();
-                    }
+                case 's': case 'S':
+                    if (!document.querySelector('.modal[style*="block"]')) showSettings();
                     break;
             }
         });
@@ -851,9 +769,7 @@
             const startBtn = document.querySelector('.start-btn');
             if (startBtn) {
                 startBtn.style.transform = 'translateY(-3px) scale(1.01)';
-                setTimeout(() => {
-                    startBtn.style.transform = 'translateY(0) scale(1)';
-                }, 300);
+                setTimeout(() => { startBtn.style.transform = 'translateY(0) scale(1)'; }, 300);
             }
         }, 5000);
 
@@ -862,11 +778,46 @@
             const title = document.querySelector('.title-main');
             if (title) {
                 title.style.transform = 'translateX(' + (Math.random() * 4 - 2) + 'px)';
-                setTimeout(() => {
-                    title.style.transform = 'translateX(0)';
-                }, 50);
+                setTimeout(() => { title.style.transform = 'translateX(0)'; }, 50);
             }
         }, 8000 + Math.random() * 10000);
+        // ✅ 어떤 버튼이든 누르면 BGM 재생 보장
+let bgmStarted = false;
+function ensureBgmPlaying() {
+    const audio = document.getElementById('bgm');
+    if (!audio) return;
+
+    // 현재 슬라이더 값(있으면) 또는 저장된 기본값 반영
+    const vol = Number(document.getElementById('bgmVolume')?.value ?? gameSettings.volume);
+    audio.volume = Math.max(0, Math.min(1, vol / 100));
+
+    if (!bgmStarted || audio.paused) {
+        const p = audio.play();
+        if (p && typeof p.then === 'function') {
+            p.then(() => { bgmStarted = true; }).catch(err => {
+                // 사용자가 아직 제대로 상호작용 안 했을 때 대비
+                console.log('Play blocked by autoplay policy:', err);
+            });
+        } else {
+            bgmStarted = true;
+        }
+    }
+}
+
+// ✅ 모든 "버튼" 클릭에 훅
+document.addEventListener('click', (e) => {
+    if (e.target.closest('button')) {
+        ensureBgmPlaying();
+    }
+});
+
+// (옵션) 키보드로 시작하는 경우(Enter/Space)도 BGM 시작
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.code === 'Space') {
+        ensureBgmPlaying();
+    }
+});
+
     </script>
 </body>
 </html>

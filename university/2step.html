@@ -19,23 +19,23 @@
       bottom: 5%;
       left: 5%;
       right: 5%;
-      background-color: rgba(0, 48, 70, 0.85);
+      background-color: white;   /* 흰색 배경 */
       border-radius: 10px;
       padding: 20px 25px;
       font-size: 20px;
       line-height: 1.7;
-      color: white;
-      box-shadow: 0 0 15px rgba(0,0,0,0.6);
+      color: black;              /* 검은 글씨 */
+      box-shadow: 0 0 15px rgba(0,0,0,0.3);
     }
 
     .speaker {
-      background-color: #003850;
+      background-color: #e0e0e0; /* 연한 회색 말풍선 */
       display: inline-block;
-      padding: 6px 18px;
-      border-top-left-radius: 5px;
-      border-top-right-radius: 5px;
+      padding: 6px 14px;
+      border-radius: 5px;
       font-weight: bold;
-      margin-bottom: 12px;
+      margin-right: 10px;
+      color: black;
     }
 
     .next-btn {
@@ -64,7 +64,7 @@
   </div>
 
   <script>
-    const text = `이제 어느덧 대학교 컴퓨터공학과에 진학했네 ...?\n\n동아리에서 실습을 진행 중인데 갑자기 내 컴퓨터만 에러가 뜬다 ...`;
+    const text = `이제 어느덧 대학교 컴퓨터공학과에 진학했네 ...?\n\n동아리에서 실습을 진행 중인데 갑자기 내 컴퓨터만 에러가 뜬다 ...`; 
     const speed = 60;
     let i = 0;
 
@@ -93,7 +93,5 @@
       }
     });
   </script>
-
-
 </body>
 </html>

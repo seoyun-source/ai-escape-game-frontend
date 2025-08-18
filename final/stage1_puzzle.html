@@ -1,163 +1,115 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <title>1단계: AI 검증 퍼즐</title>
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            background-image: url('beach.png');
-            background-size: cover;
-            background-position: center;
-            height: 100vh;
-            font-family: Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .puzzle-container {
-            background: rgba(0, 0, 0, 0.9);
-            padding: 40px;
-            border-radius: 20px;
-            color: white;
-            text-align: center;
-            max-width: 500px;
-            animation: slideIn 1s ease-out;
-        }
-
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateY(50px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        h1 {
-            margin-bottom: 20px;
-            font-size: 28px;
-        }
-
-        .captcha-box {
-            margin-top: 20px;
-            background-color: #222;
-            padding: 10px;
-            border-radius: 10px;
-            display: inline-block;
-        }
-
-        canvas {
-            background: #fff;
-            border-radius: 5px;
-            display: block;
-            margin: 10px auto;
-        }
-
-        input {
-            width: 80%;
-            padding: 10px;
-            margin-top: 10px;
-            font-size: 16px;
-        }
-
-        button {
-            margin: 10px 5px;
-            padding: 10px 15px;
-            font-size: 16px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-
-        .refresh-btn {
-            background-color: #666;
-            color: #fff;
-        }
-
-        .check-btn {
-            background-color: #4CAF50;
-            color: #fff;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <title>1단계: AI 검증 퍼즐</title>
+  <style>
+    body {
+      margin: 0; padding: 0;
+      background-image: url('beach.png');
+      background-size: cover; background-position: center;
+      height: 100vh; font-family: Arial, sans-serif;
+      display: flex; justify-content: center; align-items: center;
+    }
+    .puzzle-container {
+      background: rgba(0,0,0,0.9);
+      padding: 40px; border-radius: 20px; color: #fff; text-align: center;
+      max-width: 600px; animation: slideIn 1s ease-out;
+    }
+    @keyframes slideIn { 
+      from{opacity:0; transform:translateY(50px)} 
+      to{opacity:1; transform:translateY(0)} 
+    }
+    h1 { margin-bottom: 20px; font-size: 28px; }
+    .word-buttons { margin-top: 20px; display:flex; flex-wrap:wrap; justify-content:center; }
+    button.word-btn {
+      margin: 5px; padding: 10px 15px; font-size:16px;
+      border:0; border-radius: 6px; cursor: pointer;
+      background:#4CAF50; color:#fff; transition: background 0.2s;
+    }
+    button.word-btn:disabled { background:#333; cursor:not-allowed; }
+    .progress {
+      margin-top: 15px; font-size: 18px; color: #ddd;
+      min-height: 24px;
+    }
+    .msg { font-size: 13px; margin-top: 6px; min-height: 18px; }
+    .msg.error { color: #ff7b7b; }
+    .check-btn { margin-top:15px; padding:10px 15px; border:0; border-radius:6px; background:#2196F3; color:#fff; cursor:pointer; font-size:16px; }
+  </style>
 </head>
 <body>
-    <div class="puzzle-container">
-        <h1>AI 검증 시스템</h1>
-        <p>지금까지 나온 단계에서 얻은 값들을 모아 조합해 입력하시오.</p>
+  <div class="puzzle-container">
+    <h1>AI 검증 퍼즐</h1>
+    <p>단어를 클릭해서 문장을 완성하세요.</p>
 
-        <div class="captcha-box">
-            <canvas id="captchaCanvas" width="200" height="50"></canvas>
-            <br>
-            <input type="text" id="captchaInput" placeholder="입력하세요.">
-            <br>
-            <button class="refresh-btn" id="refreshBtn">새로고침</button>
-            <button class="check-btn" id="checkBtn">확인</button>
-        </div>
-        <p style="font-size: 12px; margin-top: 10px;">
-            사람만 읽을 수 있도록 회전·왜곡·노이즈가 적용됩니다.
-        </p>
-    </div>
+    <div class="word-buttons" id="wordButtons"></div>
 
-    <script>
-        let attemptCount = 0;
-        let captchaText = "";
+    <div class="progress" id="progress"></div>
+    <button class="check-btn" id="checkBtn">확인</button>
+    <div class="msg" id="msg"></div>
+  </div>
 
-        function randomCaptchaText(length) {
-            const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-            let text = "";
-            for (let i = 0; i < length; i++) {
-                text += chars.charAt(Math.floor(Math.random() * chars.length));
-            }
-            return text;
-        }
+  <script>
+    // ★ Django 백엔드 API 주소
+    const API_BASE = "http://127.0.0.1:8000";
 
-        function generateCaptcha() {
-            attemptCount++;
+    // 프론트에서는 정답을 보관하지 않음
+    const words = ["YOU","ARE","FAKE","HELLO","WORLD","REAL","HUMAN","TEST","GOOD","BAD"];
 
-            if (attemptCount === 3) {
-                captchaText = "YOUAREFAKE";
-            } else {
-                captchaText = randomCaptchaText(8);
-            }
+    // 랜덤 셔플
+    function shuffle(array) {
+      return array.sort(() => Math.random() - 0.5);
+    }
 
-            const canvas = document.getElementById('captchaCanvas');
-            const ctx = canvas.getContext('2d');
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const wordButtonsContainer = document.getElementById("wordButtons");
+    const progress = document.getElementById("progress");
+    const msg = document.getElementById("msg");
+    let selectedWords = [];
 
-            ctx.fillStyle = "#f2f2f2";
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            ctx.font = "28px Arial";
-            ctx.fillStyle = "#000";
-
-            for (let i = 0; i < captchaText.length; i++) {
-                const letter = captchaText[i];
-                ctx.save();
-                ctx.translate(20 * i + 15, 35);
-                ctx.rotate(Math.random() * 0.5 - 0.25);
-                ctx.fillText(letter, 0, 0);
-                ctx.restore();
-            }
-
-            for (let i = 0; i < 30; i++) {
-                ctx.beginPath();
-                ctx.arc(Math.random() * canvas.width, Math.random() * canvas.height, 1, 0, 2 * Math.PI);
-                ctx.fill();
-            }
-        }
-
-        document.getElementById('refreshBtn').addEventListener('click', generateCaptcha);
-
-        document.getElementById('checkBtn').addEventListener('click', function() {
-            const input = document.getElementById('captchaInput').value.trim();
-            if (input.toUpperCase() === captchaText) {
-                window.location.href = "stage2_ending.html";
-            } else {
-                alert("틀렸습니다. 다시 시도하세요.");
-                generateCaptcha();
-            }
+    // 버튼 생성
+    function renderButtons() {
+      wordButtonsContainer.innerHTML = "";
+      shuffle(words).forEach(word => {
+        const btn = document.createElement("button");
+        btn.className = "word-btn";
+        btn.textContent = word;
+        btn.addEventListener("click", () => {
+          selectedWords.push(word);
+          progress.textContent = selectedWords.join(" ");
+          btn.disabled = true;
         });
+        wordButtonsContainer.appendChild(btn);
+      });
+    }
+    renderButtons();
 
-        generateCaptcha();
-    </script>
+    // 확인 버튼 → 선택된 단어를 백엔드에 전달
+    document.getElementById("checkBtn").addEventListener("click", async () => {
+      try {
+        const res = await fetch(`${API_BASE}/captcha-stage/check-sequence/`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ sequence: selectedWords })
+        });
+        const data = await res.json();
+        if (data.correct) {
+          msg.textContent = "✅ 정답입니다!";
+          msg.className = "msg";
+          setTimeout(() => {
+            window.location.href = "stage2_ending.html";
+          }, 1000);
+        } else {
+          msg.textContent = "❌ 틀렸습니다. 다시 시도하세요.";
+          msg.className = "msg error";
+          selectedWords = [];
+          progress.textContent = "";
+          renderButtons();
+        }
+      } catch (err) {
+        msg.textContent = "서버 오류가 발생했습니다.";
+        msg.className = "msg error";
+      }
+    });
+  </script>
 </body>
 </html>
