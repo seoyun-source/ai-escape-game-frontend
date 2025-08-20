@@ -5,167 +5,352 @@
   <title>메시지</title>
   <meta name="viewport" content="width=360, initial-scale=1.0, user-scalable=no" />
   <style>
-    body{margin:0;background:#000;font-family:'Apple SD Gothic Neo',system-ui,sans-serif}
-    .phone-frame{width:360px;height:640px;margin:120px auto;background:#fff;border-radius:20px;position:relative;box-shadow:0 0 20px rgba(0,0,0,.5);overflow:hidden}
-    .status-bar{height:30px;background:#000;color:#fff;display:flex;justify-content:space-between;align-items:center;padding:0 15px;font-size:13px;border-bottom:1px solid #000}
-    .app-title{padding:10px 12px;font-size:20px;font-weight:700;border-bottom:1px solid #eee;color:#000;display:flex;justify-content:space-between;align-items:center}
-    .message-list{list-style:none;margin:0;padding:0;position:absolute;top:72px;bottom:170px;left:0;right:0;overflow-y:auto}
-    .message-item{padding:16px;border-bottom:1px solid #eee;cursor:pointer}
-    .message-item:hover{background:#f7f7f7}
+    body { margin:0; background:#000; font-family:'Arial',sans-serif; display:flex; justify-content:center; align-items:center; height:100vh; color:#fff }
+    .phone-frame { width:360px; height:640px; background:#fff; border-radius:20px; box-shadow:0 0 30px rgba(0,0,0,.5); overflow:hidden; position:relative; display:flex; flex-direction:column; color:#000 }
 
-    .popup{display:none;position:absolute;left:50%;top:80px;transform:translateX(-50%);width:316px;background:#fff;border:1px solid #ddd;border-radius:14px;box-shadow:0 8px 24px rgba(0,0,0,.25);z-index:10;padding:14px 14px 18px}
-    .popup h3{margin:6px 0 10px 0;font-size:16px}
-    .close-btn{position:absolute;right:12px;top:8px;cursor:pointer;font-weight:700;color:#d32f2f}
-    .msg-bubble{white-space:pre-line;line-height:1.55}
-    .clue{padding:1px 3px;border-radius:6px;background:#fff3cd;border:1px dashed #f0ad4e;cursor:pointer;transition:background .15s,border-color .15s}
-    .clue.added{background:#e2f3e8;border-color:#57b883}
-    .hint{font-size:12px;color:#888;margin-top:8px}
+    /* 상태바: 시간 좌 / LTE+배터리 우 */
+    .status-bar { height:30px; background:#000; color:#fff; display:flex; align-items:center; justify-content:space-between; padding:0 10px; font-size:13px; }
+    .status-left { display:flex; align-items:center; gap:8px }
+    .status-right { display:flex; align-items:center; gap:10px }
+    .battery { display:flex; align-items:center; gap:6px }
+    .bat-icon { position:relative; width:26px; height:12px; border:2px solid #fff; border-radius:3px; box-sizing:border-box }
+    .bat-icon::after{ content:''; position:absolute; right:-4px; top:3px; width:3px; height:6px; background:#fff; border-radius:1px }
+    .bat-level { height:100%; background:#22c55e; transition:width .35s ease, background .35s ease }
 
-    .inventory{position:absolute;left:50%;transform:translateX(-50%);bottom:120px;width:320px;background:#fafafa;border:1px solid #e5e5e5;border-radius:12px;padding:8px 10px}
-    .inventory h4{margin:0 0 6px 0;font-size:14px}
-    .chips{display:flex;flex-wrap:wrap;gap:6px}
-    .chip{font-size:12px;border:1px solid #ddd;border-radius:999px;padding:4px 8px;background:#fff}
+    .app-header { display:flex; align-items:center; gap:8px; padding:10px; border-bottom:1px solid #eee }
+    .thread-title { font-weight:700 }
+    .scorebar { margin-left:auto; font-size:12px; color:#555; display:flex; gap:10px; align-items:center }
+    .pill { border:1px solid #e5e5e5; border-radius:999px; padding:2px 8px; font-size:11px; }
+    .pill.safe { background:#f0fdf4; border-color:#bbf7d0; color:#166534 }
+    .pill.danger { background:#fff1f2; border-color:#fecaca; color:#b91c1c }
 
-    .actions{position:absolute;left:50%;transform:translateX(-50%);bottom:70px;display:flex;gap:10px}
-    .btn{background:#1976d2;color:#fff;border:none;border-radius:18px;padding:10px 16px;font-weight:700;cursor:pointer;min-width:140px;text-align:center}
-    .btn.secondary{background:#6c757d}
-    .btn:disabled{background:#b0bec5;cursor:not-allowed}
+    .thread { position:absolute; inset:81px 0 56px 0; overflow-y:auto; background:#fafafa }
+    .section-head { position:sticky; top:0; z-index:1; padding:6px 10px; font-size:12px; font-weight:700; display:flex; align-items:center; gap:6px }
+    .sec-personal { background:#eef2ff; color:#1e40af; border-bottom:1px solid #dbeafe }
+    .sec-suspect  { background:#fff7ed; color:#9a3412; border-bottom:1px solid #fed7aa }
+    .sec-safe     { background:#ecfdf5; color:#065f46; border-bottom:1px solid #bbf7d0 }
 
-    /* 홈 버튼 맨 아래 고정 */
-    .home-btn{position:absolute;left:0;right:0;bottom:20px;margin:0 auto;width:90%;text-align:center;background:#ffffff;border:1px solid #1976d2;color:#1976d2;border-radius:20px;padding:10px 0;cursor:pointer;font-weight:700}
+    .badge { font-size:10px; padding:2px 6px; border-radius:999px; background:#fff; border:1px solid #e5e5e5 }
+    .bubble { max-width:80%; background:#f3f4f6; border:1px solid #e5e5e5; border-radius:14px; margin:8px 10px; padding:8px 10px; line-height:1.35; position:relative; font-size:14px; }
+    .bubble.me { margin-left:auto; background:#e8f2ff; border-color:#cfe3ff }
+    .meta { display:block; font-size:11px; color:#888; margin-top:4px }
+    .link { color:#1f6feb; text-decoration:underline; cursor:pointer; word-break:break-all }
+    .highlight { background:#fee2e2; padding:0 2px; border-radius:4px }
+    .dim { opacity:.6 }
+
+    .banner { position:absolute; top:36px; left:50%; transform:translateX(-50%); background:#111827; color:#fff; border-radius:999px; padding:6px 12px; font-size:12px; display:none; z-index:9999; pointer-events:none; white-space:nowrap; }
+    .banner.good { background:linear-gradient(90deg,#059669,#16a34a) }
+    .banner.bad { background:linear-gradient(90deg,#b91c1c,#ef4444) }
+
+    .modal-backdrop { position:fixed; inset:0; background:rgba(0,0,0,.45); display:none; align-items:center; justify-content:center; z-index:1000; }
+    .modal { width:92%; max-width:420px; background:#fff; color:#000; border-radius:12px; box-shadow:0 10px 30px rgba(0,0,0,.35); padding:16px 16px 12px }
+    .modal h3 { margin:6px 0 10px; font-size:18px }
+    .seg { display:flex; border:1px solid #e5e5e5; border-radius:8px; overflow:hidden; margin:6px 0 }
+    .seg input { display:none }
+    .seg label { padding:8px 10px; font-size:13px; cursor:pointer }
+    .seg input:checked + label { background:#111827; color:#fff }
+    .checklist { display:grid; gap:6px; margin:8px 0 }
+    .opt { border:1px solid #e5e5e5; border-radius:8px; padding:8px; display:flex; gap:8px; align-items:flex-start; font-size:13px; }
+    .actions { display:flex; gap:8px; justify-content:flex-end; margin-top:10px }
+    .btn { border:0; border-radius:8px; padding:8px 12px; cursor:pointer; font-weight:600 }
+    .btn-primary { background:#1f6feb; color:#fff }
+    .btn-ghost { background:transparent; color:#333 }
+    .btn[disabled]{ opacity:.5; cursor:not-allowed }
+
+    .homebar { position:absolute; left:0; right:0; bottom:0; height:56px; background:#fff; border-top:1px solid #eee; display:flex; align-items:center; justify-content:center; }
+    .homebtn { width:42px; height:42px; border-radius:999px; border:1px solid #ddd; background:#f7f7f7; box-shadow:0 2px 6px rgba(0,0,0,.08); cursor:pointer; font-size:18px }
+    .homebtn:active { transform:scale(0.96) }
+
+    /* 키 공개 모달 */
+    .keybox { text-align:center; padding:6px 4px; }
+    .key-remember { font-size:13px; color:#6b7280; margin-bottom:8px; }
+    .key-you { font-weight:800; font-size:32px; letter-spacing:0.25em; color:#10b981; text-shadow:0 0 0 rgba(16,185,129,0); animation:youGlow 800ms ease-in-out forwards; }
+    @keyframes youGlow { to { text-shadow:0 0 16px rgba(16,185,129,.6); } }
   </style>
 </head>
 <body>
   <div class="phone-frame">
-    <div class="status-bar"><span>🔋 85%</span><span>LTE 📶</span></div>
-
-    <div class="app-title">
-      <span>📩 메시지</span>
-      <span id="clueCounter" style="font-size:12px;color:#555">단서 0개</span>
+    <!-- 상태바 -->
+    <div class="status-bar">
+      <div class="status-left"><span id="clock">오전 9:41</span></div>
+      <div class="status-right">
+        <span class="net">LTE 📶</span>
+        <div class="battery"><div class="bat-icon"><div id="batLevel" class="bat-level" style="width:85%"></div></div><span id="batText">85%</span></div>
+      </div>
     </div>
 
-    <ul class="message-list">
-      <li class="message-item" onclick="showMessage('엄마','밥은 잘 챙겨 먹고 있지?')">엄마</li>
-      <li class="message-item" onclick="showMessage('민수','시험 끝나면 뭐 할거야?')">민수</li>
-
-      <!-- 의심 문자: 클릭 시 suspectLink 저장 + 단서 선택 가능 -->
-      <li class="message-item" onclick="openSuspiciousMessage()">
-        [Web발신] 환급 대상 안내 (3일 이내 미신청 시 소멸)
-      </li>
-    </ul>
-
-    <div class="popup" id="popup">
-      <span class="close-btn" onclick="hidePopup()">닫기 ✕</span>
-      <h3 id="popupTitle"></h3>
-      <div id="popupBody" class="msg-bubble"></div>
-      <div class="hint">노란 부분을 클릭하면 <b>단서</b>가 모여요.</div>
+    <!-- 헤더 -->
+    <div class="app-header">
+      <span class="thread-title">문자 메시지</span>
+      <div class="scorebar">
+        <span>점수 <b id="score">0</b></span>
+        <span class="pill safe">진행 <b id="progress">0/3</b></span>
+        <span class="pill danger">❤️ <b id="lives">3</b></span>
+      </div>
     </div>
 
-    <div class="inventory" id="inventory">
-      <h4>🔎 모은 단서</h4>
-      <div class="chips" id="chipWrap"><span style="color:#888;font-size:12px">아직 없음</span></div>
+    <div class="banner" id="banner"></div>
+
+    <!-- 메시지 섹션 -->
+    <div class="thread" id="thread" aria-live="polite">
+      <div class="section-head sec-personal">개인 대화 <span class="badge">엄마</span></div>
+      <div class="bubble">오늘 저녁 떡볶이? <span class="meta">오전 9:20</span></div>
+      <div class="bubble me">콜! <span class="meta">오전 9:21</span></div>
+
+      <div class="section-head sec-suspect">의심 가능 문자 <span class="badge">검사 필요</span></div>
+      <div class="bubble case" data-id="caseA">
+        [국가장학금] 미지급 환불 발생. <span class="highlight">금일 12시 전</span> 확인 필수.
+        본인 인증 👉 <span class="link">hxxp://kr-nice-check.me/qzT8</span>
+        <span class="meta">오전 9:35 · 탭해서 판별</span>
+      </div>
+      <div class="bubble case" data-id="caseB">
+        [국민銀] 보안등급 하향. 즉시 재인증 바랍니다.
+        <span class="link">kookmin-secure.kr-login.com</span>
+        <span class="meta">오전 9:41 · 탭해서 판별</span>
+      </div>
+
+      <div class="section-head sec-safe">안전 공지 <span class="badge">학교</span></div>
+      <div class="bubble case" data-id="caseC">
+        [성신여대] 2학기 등록금 납부 안내입니다.
+        공식 페이지: <span class="link">sungshin.ac.kr/…</span>
+        <span class="meta">오전 10:10 · 탭해서 판별</span>
+      </div>
     </div>
 
-    <div class="actions">
-      <button class="btn secondary" onclick="resetProgress()">초기화</button>
-      <button id="toAnalysis" class="btn" onclick="goToAnalysis()" disabled>분석 시작</button>
-    </div>
-
-    <div class="home-btn" onclick="location.href='home_screen.html'">← 홈으로</div>
+    <div class="homebar"><button class="homebtn" id="homeBtn">◯</button></div>
   </div>
 
-  <script>
-    // ===== 상태 관리 =====
-    const STORE_KEY = 'phishingGame';
-    function getStore(){
-      const d = JSON.parse(localStorage.getItem(STORE_KEY)||'{}');
-      if(!d.clues) d.clues = [];
-      if(typeof d.urlDecoded!=='boolean') d.urlDecoded=false;   // 다음 페이지에서 채움
-      if(!d.password) d.password='SECURE2025';
-      return d;
-    }
-    function setStore(d){ localStorage.setItem(STORE_KEY, JSON.stringify(d)); updateUI(); }
+  <div class="modal-backdrop" id="backdrop"><div class="modal" id="modal"></div></div>
 
-    const CLUE_DICT = {
-      domain:'이상한 주소',
-      intl:'해외 번호',
-      urgency:'시간 압박 문구',
-      short:'짧은 링크(bit.ly)'
+  <script>
+    /* ===== 공통 API 세팅 ===== */
+    const API = "http://127.0.0.1:8000/api";
+
+    // 세션 발급/검증 (서버 재시작으로 무효된 sid 자동 회복)
+    async function getSid(){
+      let sid = sessionStorage.getItem('sid');
+      if (sid) {
+        try {
+          const ping = await fetch(`${API}/session/state?session_id=${sid}`);
+          if (ping.ok) return sid;
+        } catch(_) {}
+      }
+      const r = await fetch(`${API}/session/start`, {method:'POST'});
+      if (!r.ok) throw new Error('session start failed');
+      const j = await r.json();
+      sid = j.session_id;
+      sessionStorage.setItem('sid', sid);
+      return sid;
+    }
+
+    /* ===== 상태 ===== */
+    const state = { score:0, lives:3, progress:0, done:{}, battery:85 };
+    const NEXT_URL = 'start_2.html';
+
+    const scoreEl = document.getElementById('score');
+    const livesEl = document.getElementById('lives');
+    const progressEl = document.getElementById('progress');
+    const banner = document.getElementById('banner');
+    const batLevel = document.getElementById('batLevel');
+    const batText = document.getElementById('batText');
+
+    function setClock(){ const d=new Date(), h=d.getHours(), m=d.getMinutes(); const ap=h<12?'오전':'오후', hh=((h+11)%12+1), mm=String(m).padStart(2,'0'); document.getElementById('clock').textContent=`${ap} ${hh}:${mm}`; }
+    setClock(); setInterval(setClock, 1000);
+
+    function renderBattery(){ const p=Math.max(0,Math.min(100,state.battery)); batLevel.style.width=p+'%'; batText.textContent=p+'%'; batLevel.style.background=p<=15?'#ef4444':p<=35?'#f59e0b':'#22c55e'; }
+    function drainBattery(n=5){ state.battery=Math.max(0,state.battery-n); renderBattery(); }
+    renderBattery();
+
+    // 키 공개 모달 (서버가 준 텍스트 렌더)
+    function showKeyModal(keyText){
+      openModal(`
+        <div class="keybox">
+          <div class="key-remember">이걸 기억해…</div>
+          <div class="key-you">${keyText}</div>
+          <div class="actions" style="justify-content:center; margin-top:12px">
+            <button class="btn btn-primary" id="nextStageBtn">다음 단계</button>
+          </div>
+        </div>
+      `);
+      document.getElementById('nextStageBtn').onclick = () => { window.location.href = NEXT_URL; };
+    }
+
+    function shuffle(arr){ const a=[...arr]; for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+
+    function toast(msg, good=true){ banner.textContent=msg; banner.className='banner '+(good?'good':'bad'); banner.style.display='block'; setTimeout(()=>banner.style.display='none',1400); }
+    function addScore(n){ state.score+=n; scoreEl.textContent=state.score; }
+    function loseLife(){ state.lives--; livesEl.textContent=state.lives; if(state.lives<=0){ toast('게임 오버! 다시 시도', false); disableAll(); } }
+    function stepProgress(){ state.progress++; progressEl.textContent=`${state.progress}/3`; }
+    function disableAll(){ document.querySelectorAll('.case').forEach(b=>b.classList.add('dim')); }
+
+    document.getElementById('homeBtn').onclick = ()=>{ window.location.href='home_screen.html'; };
+
+    /* 프론트에는 텍스트/옵션만 (정답 없음) */
+    const CASES = {
+      caseA: {
+        title:'국가장학금 환불 안내(?)',
+        body:`[국가장학금] 미지급 환불 발생. 금일 12시 전 확인 필수.
+본인 인증: hxxp://kr-nice-check.me/qzT8`,
+        options:[
+          '급박한 기한',
+          '환불/금전 미끼',
+          '비공식/유사 도메인',
+          'http/철자 변형(hxxp)',
+          '공식 기관 도메인',
+          '맞춤법 완벽'
+        ]
+      },
+      caseB: {
+        title:'국민은행 보안등급 하향 안내(?)',
+        body:`[국민銀] 보안등급 하향. 즉시 재인증 바랍니다.
+kookmin-secure.kr-login.com`,
+        options:[
+          '브랜드/기관 스푸핑',
+          '서브도메인/유사 도메인',
+          '모호한 사유(보안등급 하향)',
+          'login/secure 등 키워드',
+          '공식 고객센터 번호 포함',
+          'https라서 100% 안전'
+        ]
+      },
+      caseC: {
+        title:'성신여대 등록금 안내(공식)',
+        body:`[성신여대] 2학기 등록금 납부 안내입니다.
+공식 페이지: sungshin.ac.kr/kr/392/subview.do`,
+        options:[
+          '공식 도메인',
+          '발신/맥락 일치',
+          '금전 미끼/긴급 압박 없음',
+          '단축 URL 사용',
+          '철자가 어색함',
+          '송금 유도 문구'
+        ]
+      }
     };
 
-    // ✅ 토글형 단서 선택
-    function addClue(key){
-      const store = getStore();
-      const el = document.querySelector(`[data-clue="${key}"]`);
+    const $backdrop=document.getElementById('backdrop'); const $modal=document.getElementById('modal');
+    function openModal(html){ $modal.innerHTML=html; $backdrop.style.display='flex'; }
+    function closeModal(){ $backdrop.style.display='none'; }
 
-      if(store.clues.includes(key)){
-        // 이미 있으면 제거
-        store.clues = store.clues.filter(c => c !== key);
-        if(el){
-          el.classList.remove('added');
-          el.innerText = el.innerText.replace(' ✓','');
-        }
-      } else {
-        // 없으면 추가
-        store.clues.push(key);
-        if(el){
-          el.classList.add('added');
-          if(!el.innerText.includes('✓')) el.innerText += ' ✓';
-        }
-      }
-      setStore(store);
-    }
+    // 케이스 클릭 → 모달(서버 채점)
+    document.querySelectorAll('.case').forEach(b=>{
+      b.addEventListener('click', ()=>{
+        const id=b.dataset.id; if(state.done[id]) return;
+        const data=CASES[id];
 
-    function updateUI(){
-      const {clues} = getStore();
-      document.getElementById('clueCounter').textContent = `단서 ${clues.length}개`;
-      const chipWrap = document.getElementById('chipWrap');
-      chipWrap.innerHTML = clues.length===0
-        ? '<span style="color:#888;font-size:12px">아직 없음</span>'
-        : clues.map(k=>`<span class="chip">${CLUE_DICT[k]||k}</span>`).join('');
-      document.getElementById('toAnalysis').disabled = clues.length<2; // 2개면 충분
-    }
+        const checks = shuffle(data.options).map(opt=>{
+          return '<label class="opt"><input type="checkbox" value="'+opt+'"> '+opt+'</label>';
+        }).join('');
 
-    // ===== 메시지 팝업 =====
-    function showMessage(sender, content){
-      document.getElementById('popupTitle').textContent = sender;
-      document.getElementById('popupBody').textContent = content;
-      document.getElementById('popup').style.display='block';
-    }
-    function hidePopup(){ document.getElementById('popup').style.display='none'; }
+        openModal(`
+          <h3>${data.title}</h3>
+          <div style="font-size:13px; white-space:pre-line">${data.body}</div>
+          <div style="margin-top:6px;font-weight:700">1단계: 판별</div>
+          <div class="seg">
+            <input type="radio" name="judge" id="j-safe" value="safe"><label for="j-safe">안전</label>
+            <input type="radio" name="judge" id="j-phish" value="phish"><label for="j-phish">의심</label>
+          </div>
 
-    // 의심 문자 열기: 링크들을 단서로 고를 수 있고, 기본 suspectLink 저장
-    function openSuspiciousMessage(){
-      document.getElementById('popupTitle').textContent = '[Web발신] 환급 안내';
-      document.getElementById('popupBody').innerHTML = `
-        고객님은 지난달 쇼핑 포인트 환급 대상입니다.<br>
-        신청 링크: <span class="clue" data-clue="short" onclick="addClue('short')">https://bit.ly/abC123</span><br>
-        공식 확인: <span class="clue" data-clue="domain" onclick="addClue('domain')">https://kaka0-pay.com</span><br>
-        발신: <span class="clue" data-clue="intl" onclick="addClue('intl')">+44 20 7946 0958</span><br>
-        안내: <span class="clue" data-clue="urgency" onclick="addClue('urgency')">3일 이내 미신청 시 소멸</span>
-      `;
-      document.getElementById('popup').style.display='block';
-      // 분석 대상 링크(짧은 링크)를 기본 저장 (필요 시 이후에 바꿀 수 있음)
-      localStorage.setItem('suspectLink', 'https://bit.ly/abC123');
-    }
+          <div style="margin-top:6px;font-weight:700">근거 선택 (해당되는 것 모두)</div>
+          <div class="checklist" id="checklist">${checks}</div>
 
-    // ===== 페이지 이동 =====
-    function goToAnalysis(){
-      // 안전장치: suspectLink가 없으면 기본값 저장
-      if(!localStorage.getItem('suspectLink')){
-        localStorage.setItem('suspectLink', 'https://bit.ly/abC123');
-      }
-      location.href = 'phishing_warning.html';
-    }
+          <div class="actions">
+            <button class="btn btn-ghost" id="cancelBtn">닫기</button>
+            <button class="btn btn-primary" id="submitBtn">제출</button>
+          </div>
+        `);
 
-    function resetProgress(){
-      localStorage.removeItem(STORE_KEY);
-      localStorage.removeItem('suspectLink');
-      updateUI();
-    }
+        document.getElementById('cancelBtn').onclick = closeModal;
 
-    // 초기 렌더
-    updateUI();
+        document.getElementById('submitBtn').onclick = async ()=>{
+          const judge=document.querySelector('input[name="judge"]:checked')?.value;
+          const reasons=[...document.querySelectorAll('#checklist input:checked')].map(i=>i.value);
+          if(!judge){ toast('1단계: 안전/의심 먼저 선택!', false); return; }
+
+          // 요청 보조 함수 (400도 JSON 파싱)
+          const callCheck = async () => {
+            const sid = await getSid();
+            const r = await fetch(`${API}/sms/check`, {
+              method:'POST',
+              headers:{'Content-Type':'application/json'},
+              body: JSON.stringify({ session_id: sid, case_id: id, judge, reasons })
+            });
+            if (!r.ok) {
+              const err = await r.json().catch(()=>({error:'unknown'}));
+              throw { status:r.status, error:err.error || 'unknown' };
+            }
+            return r.json(); // {correct: bool}
+          };
+
+          try {
+            let res = await callCheck();
+
+            if(res.correct){
+              addScore(12); stepProgress(); state.done[id]=true;
+              document.querySelector('.case[data-id="'+id+'"]').classList.add('dim');
+              toast('정답! 잘 판별했어 👏', true);
+              closeModal();
+
+              if(state.progress===3 && state.lives>0){
+                // 키 요청
+                const sid2 = await getSid();
+                const kr = await fetch(`${API}/key/reveal`, {
+                  method:'POST',
+                  headers:{'Content-Type':'application/json'},
+                  body: JSON.stringify({ session_id: sid2 })
+                });
+                if (!kr.ok) {
+                  const ke = await kr.json().catch(()=>({error:'unknown'}));
+                  throw { status: kr.status, error: ke.error || 'unknown' };
+                }
+                const { key } = await kr.json();
+                showKeyModal(key);
+              }
+            } else {
+              addScore(-5); loseLife(); drainBattery(5);
+              toast('오답입니다. 다시 시도해보세요.', false);
+            }
+
+          } catch(e){
+            // 세션 무효면 초기화 후 1회 재시도
+            if (e && e.error && String(e.error).toLowerCase().includes('invalid session')) {
+              sessionStorage.removeItem('sid');
+              try {
+                const res2 = await callCheck();
+                if(res2.correct){
+                  addScore(12); stepProgress(); state.done[id]=true;
+                  document.querySelector('.case[data-id="'+id+'"]').classList.add('dim');
+                  toast('정답! 잘 판별했어 👏', true);
+                  closeModal();
+                  if(state.progress===3 && state.lives>0){
+                    const sid3 = await getSid();
+                    const kr2 = await fetch(`${API}/key/reveal`, {
+                      method:'POST',
+                      headers:{'Content-Type':'application/json'},
+                      body: JSON.stringify({ session_id: sid3 })
+                    });
+                    const { key } = await kr2.json();
+                    showKeyModal(key);
+                  }
+                } else {
+                  addScore(-5); loseLife(); drainBattery(5);
+                  toast('오답입니다. 다시 시도해보세요.', false);
+                }
+              } catch(e2){
+                console.error(e2);
+                toast('서버와 통신에 문제가 있어요.', false);
+              }
+              return;
+            }
+            console.error(e);
+            toast('서버와 통신에 문제가 있어요.', false);
+          }
+        };
+      });
+    });
+
+    // 세션 프리로드
+    (async()=>{ try{ await getSid(); }catch(e){ console.error(e); } })();
   </script>
 </body>
 </html>

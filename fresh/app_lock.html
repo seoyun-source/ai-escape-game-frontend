@@ -72,14 +72,13 @@
 
     .feedback {
       margin-top: 20px;
-      font-size: 16px;
-      color: #ff8888;
-      height: 24px;
+      font-size: 22px;
+      height: 30px;
     }
 
     .back-btn {
       position: absolute;
-      bottom: 20px;
+      bottom: 10px;
       font-size: 14px;
       background: none;
       color: #ccc;
@@ -91,6 +90,34 @@
       color: #fff;
       text-decoration: underline;
     }
+
+    /* 📌 통일된 텍스트 박스 스타일 */
+    .textbox {
+      position: fixed;
+      bottom: 5%;
+      left: 5%;
+      right: 5%;
+      background-color: #ffffff;
+      color: #000;
+      border-radius: 8px;
+      padding: 18px 20px;
+      font-size: 18px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.5);
+      z-index: 999;
+      display: none;
+      pointer-events: none;
+    }
+    .speaker {
+      background-color: #e5e5e5;
+      display: inline-block;
+      padding: 5px 12px;
+      border-top-left-radius: 6px;
+      border-top-right-radius: 6px;
+      font-weight: 700;
+      margin-bottom: 10px;
+      font-size: 14px;
+    }
+    #dialogue { white-space: pre-line; line-height: 1.5; }
   </style>
 </head>
 <body>
@@ -99,7 +126,7 @@
     <div class="time" id="time">07:32</div>
     <div class="instruction">
       비밀번호를 입력하세요<br>
-      <span style="font-size: 14px; color: #888;">💡 힌트: 엄마 생일 (다이어리 참고)</span>
+      <span style="font-size: 14px; color: #888;">💡 힌트: 다이어리에서 본 엄마 생일</span>
     </div>
     <div class="dots" id="dots">____</div>
 
@@ -124,9 +151,16 @@
     <button class="back-btn" onclick="goBack()">← 힌트 다시 보기 (일기장)</button>
   </div>
 
+  <!-- 📌 통일된 말풍선 -->
+  <div class="textbox" id="textbox">
+    <div class="speaker" id="speaker">나</div>
+    <div id="dialogue">...</div>
+  </div>
+
   <script>
     let input = "";
     const correctCode = "0526";
+    let hideTimer = null;
 
     function updateDots() {
       const dots = input.split('').map(() => '●').join('');
@@ -149,21 +183,46 @@
       updateDots();
     }
 
+    function showMsg(text, who = "나", ms = 2000) {
+      const box = document.getElementById('textbox');
+      document.getElementById('speaker').innerText = who;
+      document.getElementById('dialogue').innerText = text;
+      box.style.display = 'block';
+      if (hideTimer) clearTimeout(hideTimer);
+      if (ms > 0) hideTimer = setTimeout(() => box.style.display = 'none', ms);
+    }
+
     function submitCode() {
       const feedback = document.getElementById("feedback");
       if (input === correctCode) {
         feedback.style.color = "#00ff88";
-        feedback.innerText = "✅ 잠금 해제 성공!";
+        feedback.innerText = "✔";   // 1) 체크 먼저
+
+        // 2) 잠시 있다가 말풍선
+        setTimeout(() => {
+          showMsg("🔓 잠금이 풀렸다! 홈 화면으로 가자.");
+        }, 700);
+
+        // 3) 홈 화면 이동
         setTimeout(() => {
           window.location.href = "home_screen.html";
-        }, 1500);
+        }, 2200);
       } else {
         feedback.style.color = "#ff6666";
-        feedback.innerText = "❌ 틀렸어. 다시 시도해봐!";
+        feedback.innerText = "✘";   // 1) X 먼저
+
+        // 2) 잠시 있다가 말풍선
+        setTimeout(() => {
+          showMsg("❌ 아니야. 다시 시도해보자.", "나");
+        }, 700);
+
+        // 입력 초기화
         input = "";
         updateDots();
       }
     }
+
+
 
     function updateTime() {
       const now = new Date();

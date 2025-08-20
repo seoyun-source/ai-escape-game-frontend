@@ -4,27 +4,66 @@
   <meta charset="UTF-8">
   <title>방 안에서 스마트폰 찾기</title>
   <style>
+    :root {
+      --scene-max-width: 980px; /* 장면 최대 너비(원본 이미지 비율에 맞춰 적당히 조절) */
+    }
+
     body {
       margin: 0;
-      background-image: url('A_first-person_perspective_digital_2D_illustration.png'); /* 배경 이미지 파일 필요 */
-      background-size: cover;
-      background-position: center;
-      height: 100vh;
-      position: relative;
+      background: #000; /* 검은 배경으로 여백 감추기 */
       font-family: 'Noto Sans KR', sans-serif;
+      color: #000;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px 0;
+      box-sizing: border-box;
     }
+
+    /* 배경 이미지와 핫스팟의 기준이 되는 컨테이너 */
+    .scene {
+      position: relative;
+      width: 92vw;              /* 화면에 맞춰 유동 */
+      max-width: var(--scene-max-width);
+      margin: 0 auto;
+      box-shadow: 0 0 24px rgba(0,0,0,.5);
+      border-radius: 12px;
+      overflow: hidden;         /* 라운드 모서리 안에서만 보이게 */
+      background: #111;         /* 이미지 로딩 전 배경 */
+    }
+
+    /* 실제 배경 그림 */
+    .scene .bg {
+      width: 100%;
+      height: auto;             /* 비율 유지 */
+      display: block;
+      user-select: none;
+      -webkit-user-drag: none;
+    }
+
+    /* 공통 핫스팟 스타일 */
     .hotspot {
-      position: absolute;
+      position: absolute; /* .scene을 기준 */
       cursor: pointer;
       border: 2px solid transparent;
+      /* 터치 영역 넓혀주기 */
+      box-sizing: border-box;
     }
     .hotspot:hover {
       border: 2px dashed #ff5959;
     }
 
-    /* ⬇⬇⬇ 아래 흰색 박스 스타일 */
+    /* 🔽 개별 핫스팟 좌표 (이미지 비율 기준 %, 픽셀X) */
+    /* 필요하면 값만 미세조정하면 됨 */
+    .hotspot.phone  { top: 38%; left: 55%; width: 3%;  height: 8%;  }
+    .hotspot.drawer { top: 49%; left: 69%; width: 5.8%;height: 18%; }
+    .hotspot.carpet { top: 75%; left: 67%; width: 8%;  height: 5%;  }
+    .hotspot.candy  { top: 53%; left: 30%; width: 7%;  height: 5%;  }
+
+    /* 하단 말풍선(텍스트 박스) - 프로젝트에서 쓰던 통일 스타일 */
     .textbox {
-      position: absolute;
+      position: fixed;          /* 뷰포트 기준으로 고정(장면 밖에서도 동일 위치) */
       bottom: 5%;
       left: 5%;
       right: 5%;
@@ -34,9 +73,9 @@
       padding: 18px 20px;
       font-size: 18px;
       box-shadow: 0 0 10px rgba(0,0,0,0.5);
-      z-index: 100;
-      display: none; /* 처음엔 숨김, 메시지 나오면 표시 */
-      pointer-events: none;
+      z-index: 1000;
+      display: none;            /* 처음엔 숨김 */
+      pointer-events: none;     /* 클릭 막기 */
     }
     .speaker {
       background-color: #e5e5e5;
@@ -49,41 +88,50 @@
       font-size: 14px;
     }
     #dialogue {
-      white-space: pre-line; /* \n 줄바꿈 표시 */
+      white-space: pre-line;    /* \n 줄바꿈 표시 */
       line-height: 1.5;
     }
   </style>
 </head>
 <body>
 
-  <!-- 클릭 지점들 -->
-  <div class="hotspot" style="top: 36%; left: 55%; width: 3%; height: 8%;" onclick="foundPhone()"></div>
-  <div class="hotspot" style="top: 49%; left: 69%; width: 5.2%; height: 20%" onclick="foundDrawer()"></div>
-  <div class="hotspot" style="top: 80%; left: 67%; width: 8%; height: 5%" onclick="foundCarpet()"></div>
-  <div class="hotspot" style="top: 55%; left: 30%; width: 7%; height: 5%;" onclick="foundCandy()"></div>
+  <div class="scene" id="scene">
+    <img
+      src="A_first-person_perspective_digital_2D_illustration.png"
+      alt="방 배경"
+      class="bg"
+      id="bgImg"
+    />
 
-  <!-- ⬇⬇⬇ 아래 흰색 박스 -->
-  <div id="textbox" class="textbox">
+    <!-- 핫스팟들(.scene 기준으로 고정) -->
+    <div class="hotspot phone"  onclick="foundPhone()"   aria-label="스마트폰"></div>
+    <div class="hotspot drawer" onclick="foundDrawer()"  aria-label="서랍"></div>
+    <div class="hotspot carpet" onclick="foundCarpet()"  aria-label="카펫"></div>
+    <div class="hotspot candy"  onclick="foundCandy()"   aria-label="사탕 봉지"></div>
+  </div>
+
+  <!-- 통일된 말풍선 -->
+  <div id="textbox" class="textbox" role="status" aria-live="polite">
     <div class="speaker" id="speaker">나</div>
     <div id="dialogue">...</div>
   </div>
 
   <script>
+    // 상태
     let inventory = [];
     let hideTimer = null;
-    let drawerOpend = false;
+    let drawerOpened = false;
     let diaryRead = false;
 
-    // 공통 메시지 출력: 흰 박스에 텍스트 넣고 표시
+    // 공통 메시지 (통일 말풍선)
     function showMessage(text, who = "나", autoHideMs = 2000) {
-      const speakerE1 = document.getElementById("speaker");
-      const dialogueE1 = document.getElementById("dialogue");
+      const speakerEl = document.getElementById("speaker");
+      const dialogueEl = document.getElementById("dialogue");
       const box = document.getElementById("textbox");
+      if (!speakerEl || !dialogueEl || !box) return;
 
-      if(!speakerE1 || !dialogueE1 || !box) return;
-
-      speakerE1.innerText = who;
-      dialogueE1.innerText = text;
+      speakerEl.innerText = who;
+      dialogueEl.innerText = text;
       box.style.display = "block";
 
       if (hideTimer) clearTimeout(hideTimer);
@@ -94,6 +142,7 @@
       }
     }
 
+    // 핫스팟 동작
     function foundCarpet() {
       if (!inventory.includes("key")) {
         inventory.push("key");
@@ -104,47 +153,45 @@
     }
 
     function foundDrawer() {
-      if (drawerOpend) {
+      if (drawerOpened) {
         if (!diaryRead) {
-          // 서랍은 열렸고, 이제 다이어리를 본다
           readDiary();
         } else {
-          showMessage("📖 다이어리 안에『1975.05.26 - 엄마 생일 🎂』이라고 적혀 있다.");
+          showMessage("📖 다이어리에 ‘1975.05.26 - 엄마 생일 🎂’이라고 적혀 있네.. 힌트인가 보다..");
         }
         return;
       }
-
       if (inventory.includes("key")) {
-        drawerOpend = true;
-        showMessage("🔓 열쇠로 서랍을 열었다! 안에 다이어리가 있다..!!");
+        drawerOpened = true;
+        showMessage("🔓 열쇠로 서랍을 열었다! 안에 다이어리가 있다!!");
         setTimeout(readDiary, 700);
       } else {
-        showMessage("🔒 서랍은 잠겨 있네.. 열쇠가 필요할 것 같은데...");
+        showMessage("🔒 서랍은 잠겨 있네... 열쇠가 필요할 듯.");
       }
     }
 
     function readDiary() {
       diaryRead = true;
-      showMessage("📖 다이어리 안에『1975.05.26 - 엄마 생일 🎂』이라고 적혀 있다.");
+      showMessage("📖 다이어리에서 ‘1975.05.26 - 엄마 생일 🎂’ 발견.");
     }
 
     function foundPhone() {
       if (!diaryRead) {
-        showMessage("📱 스마트폰을 찾았다! \n하지만 비밀번호 힌트가 필요해. 서랍부터 살펴보자.");
+        showMessage("📱 스마트폰은 찾았는데... 비밀번호 힌트가 필요해. 서랍부터 보자.");
         return;
       }
-      showMessage("📱 이제 비밀번호를 해보자…", "나", 800);
+      showMessage("📱 이제 비밀번호 풀러 가자...", "나", 800);
       setTimeout(() => {
         window.location.href = "app_lock.html"; // app_lock에서 0526으로 해제
       }, 900);
     }
 
     function foundCandy() {
-        showMessage("🍬 사탕 봉지...? 그냥 군것질인가?");
-      } 
+      showMessage("🍬 사탕 봉지...? 그냥 군것질인가 보네.");
+    }
 
-    // 필요하면 진입 시 기본 메시지 노출
-    // window.onload = () => showMessage("주위를 둘러보자...");
+    // 필요 시 첫 메시지
+    // window.addEventListener('load', () => showMessage("주위를 둘러보자..."));
   </script>
 
 </body>
