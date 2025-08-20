@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>홈 화면</title>
+  <style>
+    body {
+      margin: 0;
+      background-color: #000000;
+      font-family: 'Arial', sans-serif;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      color: white;
+    }
+
+    .phone-frame {
+      width: 360px;
+      height: 640px;
+      background-color: #ffffff;
+      border-radius: 20px;
+      box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+      overflow: hidden;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      color: #000000;
+    }
+
+    .status-bar {
+      height: 30px;
+      background-color: #000;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 10px;
+      font-size: 13px;
+      color: white;
+    }
+
+    .home-grid {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-top: 70px;
+      flex-grow: 1;
+    }
+
+    .app-row {
+      display: flex;
+      gap: 45px;
+      margin-bottom: 20px;
+    }
+
+    .second-row { margin-top: 10px; }
+
+    .app-icon {
+      text-align: center;
+      cursor: pointer;
+      position: relative;
+      user-select: none;
+    }
+
+    .app-icon img {
+      width: 60px;
+      height: 60px;
+      border-radius: 15px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.1);
+      transition: transform .08s ease;
+    }
+    .app-icon:active img { transform: scale(0.96); }
+
+    .app-label {
+      margin-top: 8px;
+      font-size: 13px;
+      color: #000000;
+    }
+
+    .badge {
+      position: absolute;
+      top: -3px;
+      right: 3px;
+      background-color: red;
+      color: white;
+      font-size: 11px;
+      font-weight: bold;
+      padding: 2px 6px;
+      border-radius: 999px;
+      box-shadow: 0 0 3px rgba(0,0,0,0.3);
+    }
+
+    /* 메시지 앱 잠금 상태 */
+    .locked .app-label { color: #666; }
+    .locked img { filter: grayscale(100%) brightness(0.8); }
+    .lock-overlay {
+      position: absolute; top: -6px; right: -2px;
+      background: #222; color: #fff;
+      border-radius: 10px; padding: 2px 6px;
+      font-size: 11px; font-weight: bold;
+    }
+
+    /* 잠금 해제 후 살짝 반짝 */
+    @keyframes pulse {
+      0% { transform: scale(1); box-shadow: 0 0 0 rgba(0,0,0,0); }
+      50% { transform: scale(1.04); box-shadow: 0 0 12px rgba(0,0,0,0.15); }
+      100% { transform: scale(1); box-shadow: 0 0 0 rgba(0,0,0,0); }
+    }
+    .pulse img { animation: pulse 900ms ease-out 2; }
+
+    /* 폰 바깥 하단 고정 말풍선 */
+    .textbox {
+      position: fixed;
+      bottom: 5%;
+      left: 5%;
+      right: 5%;
+      background-color: #ffffff;
+      color: #000;
+      border-radius: 8px;
+      padding: 18px 20px;
+      font-size: 18px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.5);
+      z-index: 999;
+      display: none;
+      pointer-events: none; /* 떠 있어도 폰 클릭 가능 */
+    }
+    .speaker {
+      background-color: #e5e5e5;
+      display: inline-block;
+      padding: 5px 12px;
+      border-top-left-radius: 6px;
+      border-top-right-radius: 6px;
+      font-weight: 700;
+      margin-bottom: 10px;
+      font-size: 14px;
+    }
+    #dialogue { white-space: pre-line; line-height: 1.5; }
+
+    /* 퍼즐 모달 */
+    .modal-backdrop {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.45);
+      display: none; align-items: center; justify-content: center;
+      z-index: 998;
+    }
+    .modal {
+      width: 92%; max-width: 420px;
+      background: #fff; color: #000; border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+      padding: 18px 18px 14px;
+    }
+    .modal h3 { margin: 4px 0 12px; font-size: 18px; }
+    .modal .hint { font-size: 13px; color: #666; margin-bottom: 10px; }
+    .modal .option {
+      border: 1px solid #ddd; border-radius: 8px; padding: 10px; margin-bottom: 10px;
+      cursor: pointer;
+    }
+    .modal .option:hover { background: #f7f7f7; }
+    .modal .actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 8px; }
+    .btn { border: 0; border-radius: 8px; padding: 8px 12px; cursor: pointer; font-weight: 600; }
+    .btn-primary { background:#1f6feb; color:#fff; }
+    .btn-ghost { background: transparent; color:#333; }
+    .muted { color:#777; font-size: 13px; margin-top: 6px; }
+  </style>
+</head>
+<body>
+  <div class="phone-frame">
+    <div class="status-bar">
+      <span>🔋 85%</span>
+      <span>LTE 📶</span>
+    </div>
+
+    <div class="home-grid">
+      <!-- 첫 번째 줄 -->
+      <div class="app-row">
+        <!-- 메시지 (처음엔 잠금) -->
+        <div class="app-icon locked" id="app-messages" onclick="tapMessages(this)">
+          <img src="https://cdn-icons-png.flaticon.com/512/1041/1041916.png" alt="메시지">
+          <div class="badge">3</div>
+          <div class="lock-overlay">🔒</div>
+          <div class="app-label">메시지</div>
+        </div>
+
+        <div class="app-icon" onclick="tapInfo('갤러리','사진이 잔뜩… 하지만 지금은 메시지가 더 급한데?')">
+          <img src="https://cdn-icons-png.flaticon.com/512/1829/1829586.png" alt="갤러리">
+          <div class="app-label">갤러리</div>
+        </div>
+
+        <div class="app-icon" onclick="tapInfo('설정','알 수 없는 앱 권한이 많다… 나중에 점검하자.')">
+          <img src="https://cdn-icons-png.flaticon.com/512/3524/3524659.png" alt="설정">
+          <div class="app-label">설정</div>
+        </div>
+      </div>
+
+      <!-- 두 번째 줄 -->
+      <div class="app-row second-row">
+        <div class="app-icon" onclick="tapInfo('카메라','셀카는 잠깐만… 뭔가 수상한 문자가 온 것 같아.')">
+          <img src="https://cdn-icons-png.flaticon.com/512/685/685655.png" alt="카메라">
+          <div class="app-label">카메라</div>
+        </div>
+
+        <!-- 인터넷 (퍼즐 1) -->
+        <div class="app-icon" onclick="tapInternet()">
+          <img src="https://cdn-icons-png.flaticon.com/512/1006/1006771.png" alt="인터넷">
+          <div class="app-label">인터넷</div>
+        </div>
+
+        <div class="app-icon" onclick="tapInfo('전화','최근 발신 목록에 이상한 번호가? 스미싱은 전화로 유도하기도 해.')">
+          <img src="https://cdn-icons-png.flaticon.com/512/724/724664.png" alt="전화">
+          <div class="app-label">전화</div>
+        </div>
+      </div>
+
+      <!-- 세 번째 줄 -->
+      <div class="app-row second-row">
+        <div class="app-icon" onclick="tapCalculator()">
+          <img src="https://img.icons8.com/fluency/512/calculator.png" alt="계산기">
+          <div class="app-label">계산기</div>
+        </div>
+
+        <!-- 메모장 (퍼즐 2) -->
+        <div class="app-icon" onclick="tapMemo()">
+          <img src="https://cdn-icons-png.flaticon.com/512/2921/2921222.png" alt="메모">
+          <div class="app-label">메모장</div>
+        </div>
+
+        <div class="app-icon" onclick="tapInfo('음악','광고 팝업으로 피싱 링크가 뜨기도 해. 낯선 링크는 누르지 말자!')">
+          <img src="https://cdn-icons-png.flaticon.com/512/727/727218.png" alt="음악">
+          <div class="app-label">음악</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 폰 바깥 말풍선 -->
+  <div class="textbox" id="textbox">
+    <div class="speaker" id="speaker">나</div>
+    <div id="dialogue">어라...? 문자가 많이 와있네?</div>
+  </div>
+
+  <!-- 공용 퍼즐 모달 -->
+  <div class="modal-backdrop" id="modalBackdrop">
+    <div class="modal" id="modal"></div>
+  </div>
+
+  <script>
+    /* ================== 말풍선 ================== */
+    let hideTimer = null;
+    function showMsg(text, who = "나", ms = 2000) {
+      const box = document.getElementById('textbox');
+      document.getElementById('speaker').innerText = who;
+      document.getElementById('dialogue').innerText = text;
+      box.style.display = 'block';
+      if (hideTimer) clearTimeout(hideTimer);
+      if (ms > 0) hideTimer = setTimeout(() => box.style.display = 'none', ms);
+    }
+    // 초기 안내 살짝 보여주고 숨기기
+    setTimeout(() => { document.getElementById('textbox').style.display = 'none'; }, 1600);
+
+    /* ========== 잠금 해제 상태 ========== */
+    const requiredSolved = new Set();
+    const targetCount = 2; // 인터넷/메모 2개 퍼즐 모두
+
+    function unlockIfReady() {
+      if (requiredSolved.size === targetCount) {
+        const msgApp = document.getElementById('app-messages');
+        msgApp.classList.remove('locked');
+        const lock = msgApp.querySelector('.lock-overlay');
+        if (lock) lock.remove();
+        msgApp.classList.add('pulse');
+        showMsg("🔓 메시지 앱이 열렸다! 문자를 확인해보자.");
+        setTimeout(() => msgApp.classList.remove('pulse'), 1200);
+      }
+    }
+
+    /* ================== 공용 모달 ================== */
+    const $backdrop = document.getElementById('modalBackdrop');
+    const $modal = document.getElementById('modal');
+    function openModal(html) {
+      $modal.innerHTML = html;
+      $backdrop.style.display = 'flex';
+    }
+    function closeModal() { $backdrop.style.display = 'none'; }
+
+    /* ========== 인터넷 퍼즐: 피싱 링크 판별 ========== */
+    function tapInternet() {
+      openModal(`
+        <h3>의심스러운 링크는 어느 쪽일까?</h3>
+        <div class="hint">도메인(주소) 구성이 이상한 쪽을 고르자.</div>
+        <div class="option" data-ans="phishing">http://free-event-prize.co.kr/claim?gift=1000000</div>
+        <div class="option" data-ans="safe">https://www.bank.example.com/promo</div>
+        <div class="option" data-ans="safe">https://www.sungshin.ac.kr</div>
+        <div class="actions">
+          <button class="btn btn-ghost" id="cancel">닫기</button>
+        </div>
+        <div class="muted">* 정답을 고르면 자동으로 체크됩니다.</div>
+      `);
+      $modal.querySelectorAll('.option').forEach(opt => {
+        opt.onclick = () => {
+          const isPhishing = opt.dataset.ans === 'phishing';
+          if (isPhishing) {
+            requiredSolved.add('internet');
+            showMsg("맞아! 경품·무료 같은 키워드 + 낯선 도메인은 위험해.");
+            closeModal();
+            unlockIfReady();
+          } else {
+            showMsg("아니야. 이건 정상적인 HTTPS 서브도메인 형태야.");
+          }
+        };
+      });
+      $modal.querySelector('#cancel').onclick = closeModal;
+    }
+
+    /* ========== 메모 퍼즐: 보안 수칙 체크 ========== */
+    function tapMemo() {
+      openModal(`
+        <h3>메모: “피싱 예방 체크리스트”</h3>
+        <div class="hint">올바른 두 가지를 체크하고 제출하자.</div>
+        <label class="option"><input type="checkbox" value="1"> 링크 클릭 전 발신자/도메인 확인</label><br><br>
+        <label class="option"><input type="checkbox" value="2"> 비밀번호/인증코드는 메시지로 회신</label><br><br>
+        <label class="option"><input type="checkbox" value="3"> 짧은 URL은 미리보기 등으로 내용 확인</label>
+        <div class="actions">
+          <button class="btn btn-ghost" id="cancel2">닫기</button>
+          <button class="btn btn-primary" id="submit">제출</button>
+        </div>
+      `);
+      $modal.querySelector('#cancel2').onclick = closeModal;
+      $modal.querySelector('#submit').onclick = () => {
+        const vals = [...$modal.querySelectorAll('input[type=checkbox]:checked')].map(i=>i.value).sort().join(',');
+        if (vals === '1,3') {
+          requiredSolved.add('memo');
+          showMsg("정답이야! 민감정보는 회신 금지, 링크는 꼭 검증하기!!");
+          closeModal();
+          unlockIfReady();
+        } else {
+          showMsg("다시 생각해봐. 올바르지 않은 게 포함되어 있어.");
+        }
+      };
+    }
+
+    /* ========== 메시지 앱 ========== */
+    function tapMessages(el) {
+      if (el.classList.contains('locked')) {
+        showMsg("잠겨 있어… 인터넷/메모에서 문제를 풀어야 잠금이 열리는건가..");
+        return;
+      }
+      window.location.href = 'sms_app.html';
+    }
+
+    /* ========== 기타 앱은 짧은 리액션 ========== */
+    function tapInfo(appName, text) { showMsg(`${appName}: ${text}`); }
+    function tapCalculator() { showMsg("0526… 숫자가 눈에 밟힌다."); }
+
+    /* 전역 바인딩 (HTML onclick 사용) */
+    window.tapInternet = tapInternet;
+    window.tapMemo = tapMemo;
+    window.tapMessages = tapMessages;
+    window.tapInfo = tapInfo;
+    window.tapCalculator = tapCalculator;
+  </script>
+</body>
+</html>

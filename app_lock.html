@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>스마트폰 잠금화면</title>
+  <style>
+    body {
+      margin: 0;
+      background: linear-gradient(to bottom, #222, #000);
+      font-family: 'Noto Sans KR', sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      color: white;
+    }
+
+    .phone-frame {
+      width: 360px;
+      height: 640px;
+      background-color: #111;
+      border-radius: 30px;
+      box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 30px 20px;
+      box-sizing: border-box;
+      position: relative;
+    }
+
+    .time {
+      font-size: 48px;
+      margin-bottom: 10px;
+    }
+
+    .instruction {
+      font-size: 18px;
+      margin-bottom: 10px;
+      color: #aaa;
+      text-align: center;
+    }
+
+    .dots {
+      font-size: 32px;
+      margin-bottom: 20px;
+      letter-spacing: 10px;
+    }
+
+    .keypad {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 15px;
+      width: 100%;
+      max-width: 260px;
+    }
+
+    .key {
+      background-color: #333;
+      color: white;
+      font-size: 24px;
+      padding: 15px;
+      text-align: center;
+      border-radius: 50%;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .key:hover {
+      background-color: #555;
+    }
+
+    .feedback {
+      margin-top: 20px;
+      font-size: 16px;
+      color: #ff8888;
+      height: 24px;
+    }
+
+    .back-btn {
+      position: absolute;
+      bottom: 20px;
+      font-size: 14px;
+      background: none;
+      color: #ccc;
+      border: none;
+      cursor: pointer;
+    }
+
+    .back-btn:hover {
+      color: #fff;
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="phone-frame">
+    <div class="time" id="time">07:32</div>
+    <div class="instruction">
+      비밀번호를 입력하세요<br>
+      <span style="font-size: 14px; color: #888;">💡 힌트: 엄마 생일 (다이어리 참고)</span>
+    </div>
+    <div class="dots" id="dots">____</div>
+
+    <div class="keypad">
+      <div class="key" onclick="pressKey('1')">1</div>
+      <div class="key" onclick="pressKey('2')">2</div>
+      <div class="key" onclick="pressKey('3')">3</div>
+      <div class="key" onclick="pressKey('4')">4</div>
+      <div class="key" onclick="pressKey('5')">5</div>
+      <div class="key" onclick="pressKey('6')">6</div>
+      <div class="key" onclick="pressKey('7')">7</div>
+      <div class="key" onclick="pressKey('8')">8</div>
+      <div class="key" onclick="pressKey('9')">9</div>
+      <div class="key" onclick="clearInput()">⌫</div>
+      <div class="key" onclick="pressKey('0')">0</div>
+      <div class="key" onclick="submitCode()">⏎</div>
+    </div>
+
+    <div class="feedback" id="feedback"></div>
+
+    <!-- 🔁 힌트 다시 보기 버튼 -->
+    <button class="back-btn" onclick="goBack()">← 힌트 다시 보기 (일기장)</button>
+  </div>
+
+  <script>
+    let input = "";
+    const correctCode = "0526";
+
+    function updateDots() {
+      const dots = input.split('').map(() => '●').join('');
+      document.getElementById("dots").innerText = dots.padEnd(4, '_');
+    }
+
+    function goBack() {
+      window.location.href = "find_phone.html";
+    }
+
+    function pressKey(num) {
+      if (input.length < 4) {
+        input += num;
+        updateDots();
+      }
+    }
+
+    function clearInput() {
+      input = input.slice(0, -1);
+      updateDots();
+    }
+
+    function submitCode() {
+      const feedback = document.getElementById("feedback");
+      if (input === correctCode) {
+        feedback.style.color = "#00ff88";
+        feedback.innerText = "✅ 잠금 해제 성공!";
+        setTimeout(() => {
+          window.location.href = "home_screen.html";
+        }, 1500);
+      } else {
+        feedback.style.color = "#ff6666";
+        feedback.innerText = "❌ 틀렸어. 다시 시도해봐!";
+        input = "";
+        updateDots();
+      }
+    }
+
+    function updateTime() {
+      const now = new Date();
+      const h = now.getHours().toString().padStart(2, '0');
+      const m = now.getMinutes().toString().padStart(2, '0');
+      document.getElementById("time").innerText = `${h}:${m}`;
+    }
+
+    updateTime();
+    setInterval(updateTime, 60000);
+  </script>
+
+</body>
+</html>

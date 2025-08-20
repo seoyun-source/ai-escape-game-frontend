@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>의심 링크 확인하기</title>
+  <meta name="viewport" content="width=360, initial-scale=1.0, user-scalable=no" />
+  <style>
+    body{margin:0;background:#000;font-family:'Apple SD Gothic Neo',system-ui,sans-serif}
+    .phone-frame{width:360px;height:640px;margin:120px auto;background:#fff;border-radius:20px;position:relative;box-shadow:0 0 20px rgba(0,0,0,.5);overflow:hidden}
+    .status-bar{height:30px;background:#000;color:#fff;display:flex;justify-content:space-between;align-items:center;padding:0 15px;font-size:13px;border-bottom:1px solid #000}
+    .app-title{padding:10px 12px;font-size:20px;font-weight:700;border-bottom:1px solid #eee;color:#d32f2f}
+    /* 스크롤 가능한 본문 */
+    .scroll{position:absolute;top:72px;bottom:72px;left:0;right:0;overflow-y:auto;padding:14px}
+    .card{border:1px solid #eee;border-radius:12px;padding:12px;margin-top:12px;background:#fafafa}
+    .row{display:flex;gap:8px;margin-top:6px}
+    .row input{flex:1;padding:10px;border-radius:8px;border:1px solid #ccc}
+    .btn{background:#1976d2;color:#fff;border:none;border-radius:10px;padding:9px 12px;font-weight:700;cursor:pointer}
+    .btn.secondary{background:#6c757d}
+    .footer{position:absolute;left:50%;transform:translateX(-50%);bottom:18px;display:flex;gap:10px}
+    .footer .btn{min-width:140px}
+    .good{color:#2e7d32}
+    .bad{color:#d32f2f}
+    .muted{color:#888}
+    .choice{display:block;width:100%;text-align:left;margin-top:8px;padding:10px;border:1px solid #ddd;border-radius:10px;background:#fff;cursor:pointer}
+    .choice.correct{border-color:#2e7d32}
+    .choice.wrong{border-color:#d32f2f}
+    code{background:#fff;padding:2px 4px;border:1px solid #eee;border-radius:4px}
+  </style>
+</head>
+<body>
+  <div class="phone-frame">
+    <div class="status-bar"><span>🔋 83%</span><span>LTE 📶</span></div>
+    <div class="app-title">⚠️ 의심 링크 확인하기</div>
+
+    <div class="scroll">
+      <!-- 1) 링크 미리보기 -->
+      <div class="card">
+        <b>1) 링크를 바로 누르지 말고 ‘미리보기’ 하자</b><br>
+        짧은 주소(bit.ly 등)는 진짜 갈 곳을 숨길 수 있어.
+        <div class="row">
+          <input id="shortUrl" value="" />
+          <button class="btn" id="previewBtn" onclick="expand()">링크 미리보기</button>
+        </div>
+        <div id="expandState" class="muted" style="margin-top:6px;"></div>
+        <div id="expandResult" style="margin-top:6px;color:#555;word-break:break-all;"></div>
+      </div>
+
+      <!-- 2) 뭐가 이상할까? (정답 1개 고르면 끝) -->
+      <div class="card" id="quizCard" style="display:none">
+        <b>2) 이 주소에서 뭐가 이상해 보여?</b>
+        <div id="hostView" class="muted" style="margin-top:4px"></div>
+        <button class="choice" data-key="notOfficial">공식 주소가 아니야</button>
+        <button class="choice" data-key="typo">철자가 살짝 달라(예: 숫자 0 ↔ 영문 O)</button>
+        <button class="choice" data-key="looksFine">이상한 건 없어 보여</button>
+        <div id="feedback" style="margin-top:8px;"></div>
+      </div>
+
+      <div class="card good" id="okCard" style="display:none">
+        잘 했어! 이제 보고서에서 오늘 배운 걸 간단히 정리하고 다음 방으로 가자.
+      </div>
+    </div>
+
+    <div class="footer">
+      <button class="btn secondary" onclick="location.href='sms_app.html'">← 뒤로</button>
+      <button id="toReport" class="btn" onclick="location.href='phishing_report.html'" disabled>보고서로</button>
+    </div>
+  </div>
+
+<script>
+  // ===== 설정 =====
+  const API_ENDPOINT = 'http://127.0.0.1:8000/expand'; // 필요시 수정
+  const STORE_KEY = 'phishingGame';
+
+  // 안전/공식 도메인(예시) — 실제 서비스에 맞춰 늘릴 수 있음
+  const SAFE_HOSTS = new Set([
+    'kakaopay.com','www.kakaopay.com','pay.kakao.com','kakao.com','www.kakao.com'
+  ]);
+
+  // 상태 도우미
+  function getStore(){
+    const d=JSON.parse(localStorage.getItem(STORE_KEY)||'{}');
+    if(!d.clues)d.clues=[];
+    if(typeof d.urlDecoded!=='boolean') d.urlDecoded=false;
+    if(!d.password)d.password='SECURE2025';
+    return d;
+  }
+  function setStore(d){ localStorage.setItem(STORE_KEY, JSON.stringify(d)); }
+
+  // 초기 suspectLink 채우기
+  const suspectLink = localStorage.getItem('suspectLink') || 'https://bit.ly/abC123';
+  document.getElementById('shortUrl').value = suspectLink;
+
+  // 간단 로딩 애니메이션
+  let loadingTimer = null;
+  function startLoading(el){
+    let dots=0;
+    el.textContent = '🔍 링크 확인 중';
+    loadingTimer = setInterval(()=>{
+      dots = (dots+1)%4;
+      el.textContent = '🔍 링크 확인 중' + '.'.repeat(dots);
+    }, 300);
+  }
+  function stopLoading(){ if(loadingTimer){ clearInterval(loadingTimer); loadingTimer=null; } }
+
+  // 백엔드로 미리보기(리다이렉트 추적) 요청
+  async function expand(){
+    const url = document.getElementById('shortUrl').value.trim();
+    const stateEl = document.getElementById('expandState');
+    const resultEl = document.getElementById('expandResult');
+    const quizCard = document.getElementById('quizCard');
+    const feedback = document.getElementById('feedback');
+    const hostView = document.getElementById('hostView');
+
+    feedback.textContent = '';
+    quizCard.style.display = 'none';
+    resultEl.textContent = '';
+    stateEl.classList.remove('bad');
+    stateEl.classList.remove('good');
+
+    if(!url){
+      stateEl.textContent = '주소를 입력해줘.';
+      return;
+    }
+
+    try {
+      startLoading(stateEl);
+      const res = await fetch(API_ENDPOINT, {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ url })
+      });
+      const data = await res.json();
+      console.log('[expand response]', data);
+      stopLoading();
+      
+      let finalUrl = data?.expanded_url ?? data?.finalUrl ?? "";
+      // 실패/비어있으면 교육용 가짜 결과로 폴백
+      if(!finalUrl){
+        stateEl.innerHTML = '⚠️ 서버에서 주소를 못 받았어. (연습용 주소로 진행할게!)';
+        finalUrl = 'https://kaka0-pay.com/refund?id=abc123';
+      } else {
+        stateEl.innerHTML = '✅ 목적지를 받았어!';
+      }
+
+      resultEl.innerHTML = `목적지: <b>${finalUrl}</b>`;
+      const host = safeHost(new URL(finalUrl).host); // www. 제거 등 정규화
+      hostView.textContent = `현재 주소: ${host}`;
+      quizCard.style.display = 'block';
+
+      // 스토어: urlDecoded = true
+      const s=getStore(); s.urlDecoded = true; setStore(s);
+
+      // 퀴즈 세팅
+      setupQuiz(host);
+    } catch(e){
+      stopLoading();
+      stateEl.classList.add('bad');
+      stateEl.textContent = '서버 연결에 실패했어. (서버 켰는지, CORS 허용했는지 확인!)';
+      // 폴백 제공
+      const finalUrl = 'https://kaka0-pay.com/refund?id=abc123';
+      document.getElementById('expandResult').innerHTML = `목적지(연습): <b>${finalUrl}</b>`;
+      const host = safeHost(new URL(finalUrl).host);
+      document.getElementById('hostView').textContent = `현재 주소: ${host}`;
+      document.getElementById('quizCard').style.display = 'block';
+      const s=getStore(); s.urlDecoded = true; setStore(s);
+      setupQuiz(host);
+    }
+  }
+
+  // www 제거 등 간단 정규화
+  function safeHost(h){
+    return h.replace(/^www\./,'').toLowerCase();
+  }
+
+  // 퀴즈 로직(정답 1회 선택하면 통과)
+  function setupQuiz(host){
+    const btns = Array.from(document.querySelectorAll('.choice'));
+    const feedback = document.getElementById('feedback');
+    const okCard = document.getElementById('okCard');
+    const toReport = document.getElementById('toReport');
+
+    btns.forEach(b => { b.classList.remove('correct','wrong'); b.disabled=false; });
+    feedback.textContent = ''; okCard.style.display='none'; toReport.disabled = true;
+
+    // 정답 결정 규칙:
+    // - host가 SAFE_HOSTS 안에 없으면: "공식 주소가 아니야"가 정답
+    // - host에 'kaka0-pay'처럼 숫자 0 들어가면: "철자가 살짝 달라"도 정답 처리
+    // - 그 외 SAFE_HOSTS면: "이상한 건 없어 보여" 정답
+    const isSafe = SAFE_HOSTS.has(host);
+    const hasZeroTrick = /kaka0|0-pay|pay0/.test(host);
+
+    // 정답 키 셋 만들기
+    const correctKeys = new Set();
+    if(isSafe){
+      correctKeys.add('looksFine');
+    }else{
+      correctKeys.add('notOfficial');
+      if(hasZeroTrick) correctKeys.add('typo');
+    }
+
+    btns.forEach(btn=>{
+      btn.onclick = ()=>{
+        const key = btn.getAttribute('data-key');
+        const isCorrect = correctKeys.has(key);
+
+        // UI 반영
+        btns.forEach(b=>b.disabled=true);
+        btn.classList.add(isCorrect ? 'correct' : 'wrong');
+
+        // 학습 피드백
+        if(isCorrect){
+          feedback.innerHTML = `<span class="good">정답!</span> ${
+            hasZeroTrick && (key==='typo' || key==='notOfficial')
+            ? '주소에 숫자 <b>0</b>이 들어가 있어. 영문 O와 헷갈리게 만든 거야.'
+            : (!isSafe ? '공식 사이트 주소가 아니야. 비슷하게 보이게 만든 거지.' : '이 주소는 겉보기엔 이상 없음. 그래도 직접 앱/공식 사이트에서 확인하자.')
+          }`;
+
+          // 단서 자동 반영(이미 있다면 중복 저장 X)
+          const s=getStore();
+          if(!isSafe){
+            if(!s.clues.includes('domain')) s.clues.push('domain'); // 이상한 주소
+          }
+          setStore(s);
+
+          document.getElementById('okCard').style.display='block';
+          document.getElementById('toReport').disabled = false;
+        }else{
+          feedback.innerHTML = `<span class="bad">아쉽!</span> 다시 생각해봐. 주소를 천천히 읽어보자.`;
+          // 재시도 허용
+          btns.forEach(b=>b.disabled=false);
+          btn.classList.remove('wrong');
+        }
+      };
+    });
+  }
+
+  window.expand = expand;
+</script>
+</body>
+</html>
