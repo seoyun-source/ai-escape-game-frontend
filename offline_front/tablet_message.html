@@ -1,0 +1,100 @@
+<!-- offline_front/tablet_message.html -->
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>태블릿 문자</title>
+  <style>
+    body { background:#222; color:#eee; font-family:'Noto Sans KR',sans-serif; display:flex; justify-content:center; align-items:center; height:100vh; }
+    .message-box { background:#333; padding:30px; border-radius:10px; max-width:600px; box-shadow:0 0 20px rgba(0,0,0,.5); }
+    .sender { font-weight:bold; margin-bottom:10px; color:#00ccff; }
+    .body { line-height:1.7; }
+    .link { display:block; margin-top:15px; color:#ffcc00; text-decoration:underline; }
+    .note { margin-top:10px; font-style:italic; color:#bbb; }
+    .answer-section { margin-top:25px; }
+    input[type="text"] { padding:8px; font-size:16px; width:250px; margin-right:10px; }
+    button { padding:8px 15px; font-size:16px; background:#4CAF50; color:#fff; border:none; border-radius:5px; cursor:pointer; }
+    button:hover { background:#45a049; }
+    .feedback { font-weight:bold; font-size:16px; }
+    .result-row { display:flex; align-items:center; gap:12px; margin-top:15px; }
+    .button-row { display:flex; justify-content:space-between; gap:10px; margin-top:30px; }
+    .home-button,.classroom-button { padding:10px 20px; font-size:16px; background:#008CBA; color:#fff; border:none; border-radius:5px; cursor:pointer; min-width:100px; flex:1; text-align:center; }
+    .home-button:hover,.classroom-button:hover { background:#0070a0; }
+    .next-button { padding:8px 12px; font-size:16px; background:#4CAF50; color:#fff; border:none; border-radius:5px; cursor:pointer; }
+    .next-button:hover { background:#45a049; }
+  </style>
+</head>
+<body>
+  <div class="message-box">
+    <div class="sender">[AI코드학원]</div>
+    <div class="body">
+      오늘도 퀴즈 시간입니다!<br>
+      <span class="link">https://aicode-study.kr/q?data=dHJ1c3Rfbm9ib2R5</span>
+      <div class="note">※ 퀴즈는 전용 앱을 이용해서 풀어주세요~ 😊</div>
+    </div>
+
+    <div class="answer-section">
+      <input type="text" id="answer" placeholder="결과 입력" />
+      <button onclick="checkAnswer()">제출</button>
+      <div class="result-row">
+        <div id="feedback" class="feedback"></div>
+        <button id="nextBtn" class="next-button" style="display:none"
+                onclick="location.href='1step.html'">다음으로</button>
+      </div>
+    </div>
+
+    <div class="button-row">
+      <button class="classroom-button" onclick="location.href='classroom_scene.html'">교실로</button>
+      <button class="home-button" onclick="location.href='home_screen.html'">태블릿 홈으로</button>
+    </div>
+  </div>
+
+  <script>
+    // === 설정: trust_nobody -> FLAG{ARE} ===
+    const SALT = "w9!Zx*HiddenKey";
+    const CIPHERTEXT = [178, 136, 214, 6, 57, 152, 25, 219, 129];
+
+    function fromBytes(bytes) {
+      return new TextDecoder().decode(new Uint8Array(bytes));
+    }
+    async function deriveKey(answer) {
+      const data = new TextEncoder().encode(answer + SALT);
+      const hash = await crypto.subtle.digest("SHA-256", data);
+      return new Uint8Array(hash);
+    }
+    function xorWithKey(cipher, key) {
+      const n = cipher.length, out = new Uint8Array(n);
+      for (let i = 0; i < n; i++) out[i] = cipher[i] ^ key[i % key.length];
+      return out;
+    }
+
+    async function checkAnswer() {
+      const input = document.getElementById("answer").value.trim();
+      const feedback = document.getElementById("feedback");
+      const nextBtn = document.getElementById("nextBtn");
+
+      try {
+        const key = await deriveKey(input);
+        const plain = xorWithKey(new Uint8Array(CIPHERTEXT), key);
+        const flag = fromBytes(plain);
+
+        if (flag.startsWith("FLAG{") && flag.endsWith("}")) {
+          feedback.style.color = "#00ff88";
+          feedback.innerText = flag;
+          nextBtn.style.display = "inline-block";   // 정답이면 버튼 표시
+        } else {
+          feedback.style.color = "red";
+          feedback.innerText = "오답입니다. 다시 시도해보세요!";
+          nextBtn.style.display = "none";           // 오답이면 버튼 숨김
+        }
+      } catch (e) {
+        console.error(e);
+        feedback.style.color = "red";
+        feedback.innerText = "오류가 발생했습니다.";
+        nextBtn.style.display = "none";
+      }
+    }
+    window.checkAnswer = checkAnswer;
+  </script>
+</body>
+</html>
