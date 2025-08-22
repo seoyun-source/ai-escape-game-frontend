@@ -135,7 +135,7 @@
           if (ping.ok) return sid;
         } catch(_) {}
       }
-      const r = await fetch(`${API}/session/start`, {method:'POST'});
+      const r = await fetch(`${API}/session/start/`, {method:'POST'});
       if (!r.ok) throw new Error('session start failed');
       const j = await r.json();
       sid = j.session_id;
@@ -145,7 +145,7 @@
 
     /* ===== 상태 ===== */
     const state = { score:0, lives:3, progress:0, done:{}, battery:85 };
-    const NEXT_URL = 'start_2.html';
+    const NEXT_URL = '../offline_front/start_2.html';
 
     const scoreEl = document.getElementById('score');
     const livesEl = document.getElementById('lives');
@@ -270,7 +270,7 @@ kookmin-secure.kr-login.com`,
           // 요청 보조 함수 (400도 JSON 파싱)
           const callCheck = async () => {
             const sid = await getSid();
-            const r = await fetch(`${API}/sms/check`, {
+            const r = await fetch(`${API}/sms/check/`, {
               method:'POST',
               headers:{'Content-Type':'application/json'},
               body: JSON.stringify({ session_id: sid, case_id: id, judge, reasons })
@@ -294,7 +294,7 @@ kookmin-secure.kr-login.com`,
               if(state.progress===3 && state.lives>0){
                 // 키 요청
                 const sid2 = await getSid();
-                const kr = await fetch(`${API}/key/reveal`, {
+                const kr = await fetch(`${API}/key/reveal/`, {
                   method:'POST',
                   headers:{'Content-Type':'application/json'},
                   body: JSON.stringify({ session_id: sid2 })
@@ -324,7 +324,7 @@ kookmin-secure.kr-login.com`,
                   closeModal();
                   if(state.progress===3 && state.lives>0){
                     const sid3 = await getSid();
-                    const kr2 = await fetch(`${API}/key/reveal`, {
+                    const kr2 = await fetch(`${API}/key/reveal/`, {
                       method:'POST',
                       headers:{'Content-Type':'application/json'},
                       body: JSON.stringify({ session_id: sid3 })

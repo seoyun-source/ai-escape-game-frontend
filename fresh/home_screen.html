@@ -8,7 +8,7 @@
     body { margin:0; background:#000; font-family:'Arial',sans-serif; display:flex; justify-content:center; align-items:center; height:100vh; color:#fff }
     .phone-frame { width:360px; height:640px; background:#fff; border-radius:20px; box-shadow:0 0 30px rgba(0,0,0,.5); overflow:hidden; position:relative; display:flex; flex-direction:column; color:#000 }
 
-    /* ===== sms_app과 동일한 상태바 ===== */
+    /* ===== 상태바 ===== */
     .status-bar { height:30px; background:#000; color:#fff; display:flex; align-items:center; justify-content:space-between; padding:0 10px; font-size:13px; }
     .status-left { display:flex; align-items:center; gap:8px }
     .status-right { display:flex; align-items:center; gap:10px }
@@ -50,8 +50,7 @@
 </head>
 <body>
   <div class="phone-frame">
-    <!-- ===== sms_app과 동일한 상태바 마크업 ===== -->
-    <div class="status-bar">
+    <div class="status-bar"> 
       <div class="status-left"><span id="clock">오전 9:41</span></div>
       <div class="status-right">
         <span class="net">LTE 📶</span>
@@ -69,7 +68,7 @@
           <div class="badge">3</div>
           <div class="lock-overlay">🔒</div>
           <div class="app-label">메시지</div>
-        </div>
+        </div> 
 
         <div class="app-icon" onclick="tapInfo('갤러리','사진이 잔뜩… 하지만 지금은 메시지가 더 급한데?')">
           <img src="https://cdn-icons-png.flaticon.com/512/1829/1829586.png" alt="갤러리">
@@ -88,7 +87,6 @@
           <div class="app-label">카메라</div>
         </div>
 
-        <!-- 인터넷 퍼즐 -->
         <div class="app-icon" onclick="tapInternet()">
           <img src="https://cdn-icons-png.flaticon.com/512/1006/1006771.png" alt="인터넷">
           <div class="app-label">인터넷</div>
@@ -106,7 +104,6 @@
           <div class="app-label">계산기</div>
         </div>
 
-        <!-- 메모 퍼즐 -->
         <div class="app-icon" onclick="tapMemo()">
           <img src="https://cdn-icons-png.flaticon.com/512/2921/2921222.png" alt="메모">
           <div class="app-label">메모장</div>
@@ -120,19 +117,17 @@
     </div>
   </div>
 
-  <!-- 말풍선 -->
   <div class="textbox" id="textbox">
     <div class="speaker" id="speaker">나</div>
     <div id="dialogue">어라...? 문자가 많이 와있네?</div>
   </div>
 
-  <!-- 퍼즐 모달 -->
   <div class="modal-backdrop" id="modalBackdrop">
     <div class="modal" id="modal"></div>
   </div>
 
   <script>
-    /* ===== sms_app과 동일한 상태바 로직 ===== */
+    /* ===== 상태바 ===== */
     function setClock(){
       const d=new Date(), h=d.getHours(), m=d.getMinutes();
       const ap=h<12?'오전':'오후', hh=((h+11)%12+1), mm=String(m).padStart(2,'0');
@@ -149,22 +144,29 @@
     renderBattery(85);
 
     /* ===== 공통 설정 ===== */
-    const API = "http://127.0.0.1:8000/api";  // sms_app과 동일 prefix 사용
+    const API = "http://127.0.0.1:8000/api";
     const $backdrop = document.getElementById('modalBackdrop');
     const $modal = document.getElementById('modal');
 
     async function getSid(){
       let sid = sessionStorage.getItem('sid');
-      if (sid) {
-        try {
+      console.log("getSid() 기존 sid:", sid);
+      if(sid){
+        try{
           const ping = await fetch(`${API}/session/state?session_id=${sid}`);
-          if (ping.ok) return sid;
-        } catch(_) {}
+          if(ping.ok){
+            const data = await ping.json();
+            console.log("기존 세션 서버 응답:", data);
+            return sid;
+          }
+        } catch(e){ console.error("기존 세션 확인 오류:", e); }
       }
-      const r = await fetch(`${API}/session/start`, {method:'POST'});
+      // 새 세션 발급
+      const r = await fetch(`${API}/session/start/`, {method:'POST'}); // ✅ / 추가
       const j = await r.json();
       sid = j.session_id;
       sessionStorage.setItem('sid', sid);
+      console.log("새로 발급된 sid:", sid);
       return sid;
     }
 
@@ -175,35 +177,39 @@
       document.getElementById('speaker').innerText = who;
       document.getElementById('dialogue').innerText = text;
       box.style.display = 'block';
-      if (hideTimer) clearTimeout(hideTimer);
-      if (ms>0) hideTimer = setTimeout(()=> box.style.display='none', ms);
+      if(hideTimer) clearTimeout(hideTimer);
+      if(ms>0) hideTimer = setTimeout(()=> box.style.display='none', ms);
     }
     setTimeout(()=>{ document.getElementById('textbox').style.display='none'; }, 1600);
 
     /* ===== 진행상태 확인 후 잠금 해제 ===== */
     async function refreshUnlock(){
       const sid = await getSid();
-      const r = await fetch(`${API}/session/state?session_id=${sid}`);
-      const { solved } = await r.json();
-      const msgApp = document.getElementById('app-messages');
+      try {
+        const r = await fetch(`${API}/session/state?session_id=${sid}`);
+        const data = await r.json();
+        console.log("refreshUnlock() 서버 응답:", data);
+        const { solved } = data;
 
-      if (solved.internet && solved.memo) {
-        if (msgApp.classList.contains('locked')) {
-          msgApp.classList.remove('locked');
-          const lock = msgApp.querySelector('.lock-overlay');
-          if (lock) lock.remove();
-          msgApp.classList.add('pulse');
-          showMsg("🔓 오케이! 메시지 앱 열렸다! 이제 문자 좀 봐볼까?");
-          setTimeout(()=> msgApp.classList.remove('pulse'), 1200);
+        const msgApp = document.getElementById('app-messages');
+        if(solved?.internet && solved?.memo){
+          if(msgApp.classList.contains('locked')){
+            msgApp.classList.remove('locked');
+            const lock = msgApp.querySelector('.lock-overlay');
+            if(lock) lock.remove();
+            msgApp.classList.add('pulse');
+            showMsg("🔓 오케이! 메시지 앱 열렸다! 이제 문자 좀 봐볼까?");
+            setTimeout(()=> msgApp.classList.remove('pulse'), 1200);
+          }
         }
-      }
+      } catch(e){ console.error("refreshUnlock() 오류:", e); }
     }
 
-    /* ===== 공용 모달 ===== */
+    /* ===== 모달 ===== */
     function openModal(html){ $modal.innerHTML = html; $backdrop.style.display='flex'; }
     function closeModal(){ $backdrop.style.display='none'; }
 
-    /* ===== 인터넷 퍼즐 (서버 채점) ===== */
+    /* ===== 인터넷 퍼즐 ===== */
     function tapInternet(){
       openModal(`
         <h3>의심스러운 링크는 어느 쪽일까?</h3>
@@ -211,9 +217,7 @@
         <div class="option" data-idx="0">http://free-event-prize.co.kr/claim?gift=1000000</div>
         <div class="option" data-idx="1">https://www.bank.example.com/promo</div>
         <div class="option" data-idx="2">https://www.sungshin.ac.kr</div>
-        <div class="actions">
-          <button class="btn btn-ghost" id="cancel">닫기</button>
-        </div>
+        <div class="actions"><button class="btn btn-ghost" id="cancel">닫기</button></div>
         <div class="muted">* 정답을 고르면 자동으로 체크됩니다.</div>
       `);
       $modal.querySelector('#cancel').onclick = closeModal;
@@ -221,12 +225,12 @@
         opt.onclick = async ()=>{
           const choiceIndex = parseInt(opt.getAttribute('data-idx'),10);
           const sid = await getSid();
-          const r = await fetch(`${API}/quiz/check`, {
+          const r = await fetch(`${API}/quiz/check/`, {
             method:'POST', headers:{'Content-Type':'application/json'},
-            body: JSON.stringify({ quiz_id: "home_internet", choice_index: choiceIndex, session_id: sid })
+            body: JSON.stringify({ quiz_id:"home_internet", choice_index:choiceIndex, session_id:sid })
           });
           const { correct } = await r.json();
-          if (correct) {
+          if(correct){
             showMsg("맞아. '무료', '경품' 같은 단어 + 낯선 주소는 일단 의심부터!");
             closeModal();
             refreshUnlock();
@@ -237,7 +241,7 @@
       });
     }
 
-    /* ===== 메모 퍼즐 (서버 채점) ===== */
+    /* ===== 메모 퍼즐 ===== */
     function tapMemo(){
       openModal(`
         <h3>메모: “피싱 예방 체크리스트”</h3>
@@ -254,12 +258,12 @@
       $modal.querySelector('#submit').onclick = async ()=>{
         const choices = [...$modal.querySelectorAll('input[type=checkbox]:checked')].map(i=>parseInt(i.value,10));
         const sid = await getSid();
-        const r = await fetch(`${API}/quiz/check`, {
+        const r = await fetch(`${API}/quiz/check/`, { //
           method:'POST', headers:{'Content-Type':'application/json'},
-          body: JSON.stringify({ quiz_id: "home_memo", choices, session_id: sid })
+          body: JSON.stringify({ quiz_id:"home_memo", choices, session_id:sid })
         });
         const { correct } = await r.json();
-        if (correct) {
+        if(correct){
           showMsg("정답! 개인정보 회신은 절대 금지, 링크는 반드시 확인!");
           closeModal();
           refreshUnlock();
@@ -271,25 +275,22 @@
 
     /* ===== 메시지 앱 ===== */
     function tapMessages(el){
-      if (el.classList.contains('locked')) {
+      if(el.classList.contains('locked')){
         showMsg("잠겨 있어… 인터넷/메모 퍼즐부터 풀어야 열릴 듯?");
         return;
       }
       window.location.href = 'sms_app.html';
     }
 
-    /* ===== 기타 ===== */
     function tapInfo(appName, text){ showMsg(`${appName}: ${text}`); }
     function tapCalculator(){ showMsg("0526... 아까 본 날짜가 자꾸 눈에 밟히네."); }
 
-    /* 전역 바인딩 */
     window.tapInternet = tapInternet;
     window.tapMemo = tapMemo;
     window.tapMessages = tapMessages;
     window.tapInfo = tapInfo;
     window.tapCalculator = tapCalculator;
 
-    /* 초기 */
     (async ()=>{ await getSid(); await refreshUnlock(); })();
   </script>
 </body>
